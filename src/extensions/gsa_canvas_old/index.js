@@ -1,9 +1,7 @@
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
 const Color = require('../../util/color');
-const cstore = require('./canvasStorage');
 const Cast = require('../../util/cast');
-const store = new cstore();
 
 /**
  * Class
@@ -16,69 +14,8 @@ class canvas {
          * @type {runtime}
          */
         this.runtime = runtime;
-        store.attachRuntime(runtime);
     }
-
-    static get canvasStorageHeader() {
-        return 'canvases: ';
-    }
-
-    deserialize(data) {
-        store.canvases = {};
-        for (const canvas of data) {
-            store.newCanvas(canvas.name, canvas.width, canvas.height, canvas.id);
-        }
-    }
-
-    serialize() {
-        return store.getAllCanvases()
-            .map(variable => ({
-                name: variable.name,
-                width: variable.width,
-                height: variable.height,
-                id: variable.id
-            }));
-    }
-
-    readAsImageElement(src) {
-        return new Promise((resolve, reject) => {
-            const image = new Image();
-            image.onload = function () {
-                resolve(image);
-                image.onload = null;
-                image.onerror = null;
-            };
-            image.onerror = function () {
-                reject(new Error('Costume load failed. Asset could not be read.'));
-                image.onload = null;
-                image.onerror = null;
-            };
-            image.src = src;
-        });
-    }
-
-    orderCategoryBlocks(blocks) {
-        const button = blocks[0];
-        const varBlock = blocks[1];
-        delete blocks[0];
-        delete blocks[1];
-        // create the variable block xml's
-        const varBlocks = store.getAllCanvases().map(canvas => varBlock
-            .replace('{canvasId}', canvas.id));
-        if (!varBlocks.length) {
-            return [button];
-        }
-        // push the button to the top of the var list
-        varBlocks
-            .reverse()
-            .push(button);
-        // merge the category blocks and variable blocks into one block list
-        blocks = varBlocks
-            .reverse()
-            .concat(blocks);
-        return blocks;
-    }
-
+    
     /**
      * @returns {object} metadata for this extension and its blocks.
      */
@@ -90,7 +27,6 @@ class canvas {
             color2: '#0060B4',
             color3: '#0060B4',
             isDynamic: true,
-            orderBlocks: this.orderCategoryBlocks,
             blocks: [
                 {
                     opcode: 'createNewCanvas',
@@ -406,86 +342,6 @@ class canvas {
                 }
             }
         };
-    }
-
-    createNewCanvas() {
-        const newCanvas = prompt('canvas name?', 'newCanvas');
-        // if this camvas already exists, remove it to minimize confusion
-        if (!newCanvas) return alert('Canceled')
-        if (store.getCanvasByName(newCanvas)) return;
-        store.newCanvas(newCanvas);
-        vm.emitWorkspaceUpdate();
-        this.serialize();
-    }
-
-    getCanvasMenuItems() {
-        const canvases = store.getAllCanvases();
-        if (canvases.length < 1) return [{ text: '', value: '' }];
-        return canvases.map(canvas => ({
-            text: canvas.name,
-            value: canvas.id
-        }));
-    }
-
-    canvasGetter(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        return canvasObj.element.toDataURL();
-    }
-
-    setGlobalCompositeOperation(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.globalCompositeOperation = args.CompositeOperation;
-    }
-
-    setBorderColor(args) {
-        const color = Cast.toString(args.color);
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.strokeStyle = color;
-    }
-
-    setFill(args) {
-        const color = Cast.toString(args.color);
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.fillStyle = color;
-    }
-
-    setSize(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.element.width = args.width;
-        canvasObj.element.height = args.height;
-        canvasObj.context = canvasObj.element.getContext('2d');
-    }
-
-    drawRect(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.fillRect(args.x, args.y, args.width, args.height);
-    }
-
-    drawImage(args) {
-        return new Promise(resolve => {
-            const canvasObj = store.getCanvas(args.canvas);
-            const image = new Image();
-            image.onload = () => {
-                canvasObj.context.drawImage(image, args.x, args.y);
-                resolve();
-            };
-            image.src = args.src;
-        });
-    }
-
-    clearAria(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.clearRect(args.x, args.y, args.width, args.height);
-    }
-
-    clearCanvas(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.clearRect(0, 0, canvasObj.width, canvasObj.height);
-    }
-
-    setTransparency(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.globalAlpha = args.transparency / 100;
     }
 }
 

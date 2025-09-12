@@ -1,8 +1,5 @@
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const Color = require('../../util/color');
-const {validateJSON} = require('../../util/json-block-utilities');
-const Cast = require('../../util/cast');
 
 /**
  * Class for TurboWarp blocks
@@ -313,111 +310,6 @@ class colorBlocks {
                 }
             }
         };
-    }
-
-    defaultBlack () {
-        return JSON.stringify(Color.RGB_BLACK);
-    }
-    defaultWhite () {
-        return JSON.stringify(Color.RGB_WHITE);
-    }
-
-    colorPicker (args) {
-        const color = Color.hexToDecimal(args.COLOR);
-        const argsColor = { color: color };
-        switch (Cast.toString(args.OUTPUT).toLowerCase()) {
-        case "rgb":
-            return this.decimalToRgb(argsColor);
-        case "hsv":
-            return this.decimalToHsv(argsColor);
-        case "hex":
-            // todo: args.COLOR is already hex now
-            return this.decimalToHex(argsColor);
-        default:
-            return color;
-        }
-    }
-
-    csbMaker (args) {
-        const color = {
-            h: args.h * 360 / 100,
-            s: args.s / 100,
-            v: args.v / 100
-        };
-        if (!isNaN(args.a)) color.a = args.a / 100;
-        return JSON.stringify(color);
-    }
-    hsvMaker (args) {
-        const color = {
-            h: args.h,
-            s: args.s,
-            v: args.v
-        };
-        if (!isNaN(args.a)) color.a = args.a;
-        return JSON.stringify(color);
-    }
-    rgbMaker (args) {
-        const color = {
-            r: args.r,
-            g: args.g,
-            b: args.b
-        };
-        if (!isNaN(args.a)) color.a = args.a;
-        return JSON.stringify(color);
-    }
-    mixColors (args) {
-        const color1 = validateJSON(args.color1).object;
-        const color2 = validateJSON(args.color2).object;
-        return JSON.stringify(Color.mixRgb(color1, color2, args.percent));
-    }
-
-    rgbToDecimal (args) {
-        const color = validateJSON(args.color).object;
-        return Color.rgbToDecimal(color);
-    }
-    rgbToHex (args) {
-        const color = validateJSON(args.color).object;
-        return Color.rgbToHex(color);
-    }
-    rgbToHsv (args) {
-        const color = validateJSON(args.color).object;
-        return JSON.stringify(Color.rgbToHsv(color));
-    }
-    hexToDecimal (args) {
-        const color = args.color;
-        return Color.hexToDecimal(color);
-    }
-    hexToRgb (args) {
-        const color = Color.hexToRgb(args.color);
-        return JSON.stringify(color);
-    }
-    hexToHsv (args) {
-        const color = Color.hexToRgb(args.color);
-        return JSON.stringify(Color.rgbToHsv(color));
-    }
-    decimalToHex (args) {
-        const color = Number(args.color);
-        return Color.decimalToHex(color);
-    }
-    decimalToRgb (args) {
-        const color = Color.decimalToRgb(Number(args.color));
-        return JSON.stringify(color);
-    }
-    decimalToHsv (args) {
-        const color = Color.decimalToRgb(Number(args.color));
-        return JSON.stringify(Color.rgbToHsv(color));
-    }
-    hsvToHex (args) {
-        const color = Color.hsvToRgb(validateJSON(args.color).object);
-        return Color.rgbToHex(color);
-    }
-    hsvToRgb (args) {
-        const color = Color.hsvToRgb(validateJSON(args.color).object);
-        return JSON.stringify(color);
-    }
-    hsvToDecimal (args) {
-        const color = Color.hsvToRgb(validateJSON(args.color).object);
-        return Color.rgbToDecimal(color);
     }
 }
 
