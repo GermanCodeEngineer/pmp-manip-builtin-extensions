@@ -1,10 +1,6 @@
 const formatMessage = require('format-message');
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-// const Cast = require('../../util/cast');
-
-const proxy = "https://proxy.jwklong.repl.co"
-const prefix = "https://postlit.dev/"
 
 /**
  * Class for PostLit blocks
@@ -18,13 +14,6 @@ class jwPostLit {
          */
         this.runtime = runtime;
     }
-
-    loginData = {
-        username: '',
-        token: ''
-    }
-
-    latestPost = ''
 
     /**
      * @returns {object} metadata for this extension and its blocks.
@@ -200,156 +189,6 @@ class jwPostLit {
                 ]
             }
         };
-    }
-
-    async signIn(args, util) {
-        const username = String(args.USER)
-        const password = String(args.PASS)
-        var response = await fetch(proxy, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                url: prefix + "signin",
-                method: 'POST',
-                body: {
-                    username: username,
-                    password: password
-                }
-            })
-        })
-        var data = await response.json()
-        if (data.success) {
-            this.loginData = {
-                username: username,
-                token: data.token
-            }
-        }
-    }
-
-    currentUsername(args, util) {
-        return this.loginData.username
-    }
-
-    currentToken(args, util) {
-        return this.loginData.token
-    }
-
-    isSignedIn(args, util) {
-        return this.loginData.token !== ''
-    }
-
-    async createPost(args, util) {
-        const string = String(args.STRING)
-        var response = await fetch(proxy, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                url: prefix + "post",
-                method: 'POST',
-                headers: {
-                    cookie: "token="+this.loginData.token
-                },
-                body: {
-                    content: string
-                }
-            })
-        })
-        const data = await response.json()
-        if (data.success) {
-            this.latestPost = data.success.split("/")[2]
-        }
-    }
-
-    getLatestPost(args, util) {
-        return this.latestPost
-    }
-
-    async getPost(args, util) {
-        const id = String(args.ID)
-        const wants = String(args.WANTS)
-        const url = prefix + "posts/" + id + "/data/"
-        var response = await fetch(proxy, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                url: url,
-                headers: {
-                    cookie: "token="+this.loginData.token
-                },
-            })
-        })
-        const data = await response.json()
-        switch (wants) {
-            case 'json':
-                return JSON.stringify(data)
-            case 'author':
-                return data.author
-            case 'content':
-                return data.content
-            case 'time':
-                return data.time
-            case 'comments':
-                return data.comments
-            case 'likes':
-                return (data.likes || []).length
-            case 'likers':
-                return JSON.stringify(data.likes || [])
-            case 'reposts':
-                return data.reposts || 0
-            default:
-                return ''
-        }
-    }
-    
-    likePost(args, util) {
-        const id = String(args.ID)
-        fetch(proxy, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: {
-                url: prefix + "like",
-                method: "POST",
-                headers: {
-                    cookie: "token="+this.loginData.token
-                },
-                body: {
-                    post: id
-                }
-            }
-        })
-    }
-    
-    unlikePost(args, util) {
-        const id = String(args.ID)
-        fetch(proxy, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: {
-                url: prefix + "unlike",
-                method: "POST",
-                headers: {
-                    cookie: "token="+this.loginData.token
-                },
-                body: {
-                    post: id
-                }
-            }
-        })
     }
 }
 

@@ -1,6 +1,4 @@
 const BlockType = require('../../extension-support/block-type');
-const ArgumentType = require('../../extension-support/argument-type');
-const Cast = require('../../util/cast');
 
 /**
  * Class for Shaders blocks
@@ -52,13 +50,6 @@ class jgShadersBlocks {
                 },
             }
         };
-    }
-
-    enableShader(args) {
-        const shader = Cast.toString(args.SHADER).toLowerCase();
-    }
-    disableShader(args) {
-        const shader = Cast.toString(args.SHADER).toLowerCase();
     }
 }
 

@@ -360,7 +360,7 @@ class pmSensingExpansion {
                     text: '[ONE] changed?',
                     arguments: {
                         ONE: {
-                          type: null,
+                          Type: class {},
                         },
                     },
                 }

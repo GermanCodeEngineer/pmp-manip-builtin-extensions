@@ -13,8 +13,6 @@ class jwProto {
          * @type {Runtime}
          */
         this.runtime = runtime;
-        // register compiled blocks
-        this.runtime.registerCompiledExtensionBlocks('jwProto', this.getCompileInfo());
     }
 
     /**
@@ -153,53 +151,6 @@ class jwProto {
                 },
             ]
         };
-    }
-    /**
-     * This function is used for any compiled blocks in the extension if they exist.
-     * Data in this function is given to the IR & JS generators.
-     * Data must be valid otherwise errors may occur.
-     * @returns {object} functions that create data for compiled blocks.
-     */
-    getCompileInfo() {
-        return {
-            ir: {
-                labelFunction: (generator, block) => ({
-                    kind: 'stack',
-                    branch: generator.descendSubstack(block, 'SUBSTACK')
-                })
-            },
-            js: {
-                labelFunction: (node, compiler, imports) => {
-                    compiler.descendStack(node.branch, new imports.Frame(false));
-                }
-            }
-        };
-    }
-
-    labelHat() {
-        return false;
-    }
-    labelFunction(_, util) {
-        util.startBranch(1, false);
-    }
-    labelCommand() {
-        return;
-    }
-    labelReporter(args) {
-        return args.VALUE;
-    }
-    labelBoolean(args) {
-        return args.VALUE;
-    }
-
-    placeholderCommand() {
-        return;
-    }
-    placeholderReporter() {
-        return '';
-    }
-    placeholderBoolean() {
-        return false;
     }
 }
 

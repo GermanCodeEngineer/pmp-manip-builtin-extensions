@@ -1,6 +1,5 @@
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const Cast = require('../../util/cast');
 
 // Object.create(null) prevents "variable [toString]" from returning a function
 let runtimeVariables = Object.create(null);
@@ -11,10 +10,6 @@ const label = (name, hidden) => ({
     text: name,
     hideFromPalette: hidden
 });
-
-function resetRuntimeVariables() {
-    runtimeVariables = Object.create(null);
-}
 
 /**
  * Class
@@ -210,95 +205,6 @@ class lmsTempVars2 {
                 }
             ]
         };
-    }
-
-    /* THREAD VARIABLES */
-
-    setThreadVariable(args, util) {
-        const thread = util.thread;
-        if (!thread.variables) thread.variables = Object.create(null);
-        const vars = thread.variables;
-        vars[args.VAR] = args.STRING;
-    }
-  
-    changeThreadVariable(args, util) {
-        const thread = util.thread;
-        if (!thread.variables) thread.variables = Object.create(null);
-        const vars = thread.variables;
-        const prev = Cast.toNumber(vars[args.VAR]);
-        const next = Cast.toNumber(args.NUM);
-        vars[args.VAR] = prev + next;
-    }
-  
-    getThreadVariable(args, util) {
-        const thread = util.thread;
-        if (!thread.variables) thread.variables = Object.create(null);
-        const vars = thread.variables;
-        const varValue = vars[args.VAR];
-        if (typeof varValue === "undefined") return "";
-        return varValue;
-    }
-  
-    threadVariableExists(args, util) {
-        const thread = util.thread;
-        if (!thread.variables) thread.variables = Object.create(null);
-        const vars = thread.variables;
-        const varValue = vars[args.VAR];
-        return !(typeof varValue === "undefined");
-    }
-  
-    forEachThreadVariable(args, util) {
-        const thread = util.thread;
-        if (!thread.variables) thread.variables = Object.create(null);
-        const vars = thread.variables;
-        if (typeof util.stackFrame.index === "undefined") {
-            util.stackFrame.index = 0;
-        }
-        if (util.stackFrame.index < Number(args.NUM)) {
-            util.stackFrame.index++;
-            vars[args.VAR] = util.stackFrame.index;
-            return true;
-        }
-    }
-  
-    listThreadVariables(args, util) {
-        const thread = util.thread;
-        if (!thread.variables) thread.variables = Object.create(null);
-        const vars = thread.variables;
-        return Object.keys(vars).join(",");
-    }
-  
-    /* RUNTIME VARIABLES */
-  
-    setRuntimeVariable(args) {
-        runtimeVariables[args.VAR] = args.STRING;
-    }
-  
-    changeRuntimeVariable(args) {
-        const prev = Cast.toNumber(runtimeVariables[args.VAR]);
-        const next = Cast.toNumber(args.NUM);
-        runtimeVariables[args.VAR] = prev + next;
-    }
-  
-    getRuntimeVariable(args) {
-        if (!(args.VAR in runtimeVariables)) return "";
-        return runtimeVariables[args.VAR];
-    }
-  
-    runtimeVariableExists(args) {
-        return args.VAR in runtimeVariables;
-    }
-  
-    listRuntimeVariables(args, util) {
-        return Object.keys(this.runtime.variables).join(",");
-    }
-  
-    deleteRuntimeVariable(args) {
-        Reflect.deleteProperty(runtimeVariables, args.VAR);
-    }
-  
-    deleteAllRuntimeVariables() {
-        runtimeVariables = Object.create(null);
     }
 }
 

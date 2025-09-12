@@ -1,7 +1,6 @@
 const formatMessage = require('format-message');
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-// const Cast = require('../../util/cast');
 
 /**
  * Class for Structs
@@ -10,21 +9,17 @@ const ArgumentType = require('../../extension-support/argument-type');
 
 class jwStructs {
     constructor(runtime) {
-        console.log("Welcome to the OOP extension!");
         /**
          * The runtime instantiating this block package.
          * @type {Runtime}
          */
         this.runtime = runtime;
-        this.classes = {};
-        this.objects = {};
     }
 
     /**
      * @returns {object} metadata for this extension and its blocks.
      */
     getInfo() {
-        console.log("Getting info for the OOP extension!");
         return {
             id: 'jwStructs',
             name: 'Structs',
@@ -221,92 +216,6 @@ class jwStructs {
                 }
             ]
         };
-    }
-
-    createClass(args,util) {
-        var name = args.NAME;
-        if (name in this.classes) {
-            return;
-        }
-        this.classes[name] = {
-            properties: {},
-            methods: {}
-        };
-    }
-
-    createClassProperty(args,util) {
-        var name = args.NAME;
-        var value = args.VALUE;
-        var className = args.CLASS;
-        if (className in this.classes) {
-            this.classes[className].properties[name] = value;
-        }
-    }
-
-    newObject(args,util) {
-        var name = args.NAME;
-        var className = args.CLASS;
-        if (className in this.classes) {
-            this.objects[name] = this.classes[className];
-        }
-    }
-
-    setObjectProperty(args,util) {
-        var property = args.PROPERTY;
-        var object = args.OBJECT;
-        var value = args.VALUE;
-        if (object in this.objects) {
-            this.objects[object].properties[property] = value;
-        }
-    }
-
-    returnObjectProperty(args,util) {
-        var property = args.PROPERTY;
-        var object = args.OBJECT;
-        if (object in this.objects) {
-            return this.objects[object].properties[property];
-        }
-    }
-
-    createClassMethod(args,util) {
-        var name = args.NAME;
-        var className = args.CLASS;
-        if (className in this.classes) {
-            this.classes[className].methods[name] = util.stackFrame;
-        }
-    }
-
-    callObjectMethod(args,util) {
-        var name = args.NAME;
-        var object = args.OBJECT;
-        if (object in this.objects) {
-            var method = this.objects[object].methods[name];
-            if (method) {
-                util.startBranch(1,method);
-            }
-        }
-    }
-
-    deleteClasses(args,util) {
-        this.classes = {};
-    }
-
-    deleteObjects(args,util) {
-        this.objects = {};
-    }
-
-    deleteClass(args,util) {
-        var className = args.CLASS;
-        if (className in this.classes) {
-            delete this.classes[className];
-        }
-    }
-
-    deleteObject(args,util) {
-        var object = args.OBJECT;
-        if (object in this.objects) {
-            delete this.objects[object];
-        }
     }
 }
 

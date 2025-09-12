@@ -1,6 +1,5 @@
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const ProjectPermissionManager = require('../../util/project-permissions');
 
 /**
  * Class for Permission blocks
@@ -43,41 +42,6 @@ class JgPermissionBlocks {
                 permissions2: "fetchPermissionsList2"
             }
         };
-    }
-
-    fetchPermissionsList() {
-        return Object.getOwnPropertyNames(ProjectPermissionManager.permissions).filter(name => typeof ProjectPermissionManager.permissions[name] === "boolean").map(permissionName => ({
-            text: permissionName,
-            value: permissionName
-        }));
-    }
-
-    fetchPermissionsList2() {
-        // tw says deleting menu elements is unsafe
-        return Object.getOwnPropertyNames(ProjectPermissionManager.permissions).filter(name => typeof ProjectPermissionManager.permissions[name] === "boolean").filter(name => name !== "javascript").map(permissionName => ({
-            text: permissionName,
-            value: permissionName
-        }));
-    }
-
-    requestPermission(args) {
-        const permission = args.PERMISSION;
-        if (ProjectPermissionManager.permissions[permission] == true) return true;
-        return ProjectPermissionManager.RequestPermission(permission);
-    }
-    requestPermission2(args) {
-        // tw says deleting menu elements is unsafe
-        const permission = args.PERMISSION;
-        if (ProjectPermissionManager.permissions[permission] == true) return true;
-        return ProjectPermissionManager.RequestPermission(permission);
-    }
-    requestAllPermission() {
-        return ProjectPermissionManager.RequestAllPermissions();
-    }
-    requestSitePermission(args) {
-        const site = args.URL;
-        if (ProjectPermissionManager.permissions.limitedWebsites[site] == true) return true;
-        return ProjectPermissionManager.RequestPermission("limitedWebsite", site);
     }
 }
 

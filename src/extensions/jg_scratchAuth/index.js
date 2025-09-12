@@ -1,16 +1,13 @@
 const formatMessage = require('format-message');
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const Cast = require('../../util/cast');
-const Legacy = require('./legacy');
 
-const Icon = require("./icon.svg");
+const Icon = null; // Icons do not matter
 
 /**
  * Class for Scratch Authentication blocks
  * @constructor
  */
-let currentPrivateCode = '';
 class JgScratchAuthenticateBlocks {
     constructor(runtime) {
         /**
@@ -18,26 +15,6 @@ class JgScratchAuthenticateBlocks {
          * @type {Runtime}
          */
         this.runtime = runtime;
-
-        this.promptStatus = {
-            inProgress: false,
-            blocked: false,
-            completed: false,
-            userClosed: false,
-        };
-        this.loginInfo = {};
-
-        // legacy
-        this.keepAllowingAuthBlock = true;
-        this.disableConfirmationShown = false;
-    }
-
-
-    /**
-     * dummy function for reseting user provided permisions when a save is loaded
-     */
-    deserialize() {
-        this.disableConfirmationShown = false;
     }
 
     /**
@@ -174,141 +151,6 @@ class JgScratchAuthenticateBlocks {
                 ]
             }
         };
-    }
-
-    // menus
-    _getLoginLocations() {
-        const nameSplit = document.title.split(" - ");
-        nameSplit.pop();
-        const projectName = Cast.toString(nameSplit.join(" - "));
-        return [
-            projectName === 'PenguinMod' ? 'Project' : projectName,
-            'PenguinMod',
-            'Game',
-        ];
-    }
-
-    // util
-    async parseLoginCode_() {
-        if (!currentPrivateCode) throw new Error('Private code not present');
-        const req = await fetch(`https://pm-bapi.vercel.app/api/verifyToken?privateCode=${currentPrivateCode}`);
-        const json = await req.json();
-        this.loginInfo = {
-            valid: json.valid,
-            username: json.username
-        };
-        return this.loginInfo;
-    }
-
-    // blocks
-    showPrompt(args) {
-        // reset
-        this.promptStatus = {
-            inProgress: true,
-            blocked: false,
-            completed: false,
-            userClosed: false,
-        };
-        this.loginInfo = {};
-
-        const loginLocation = Cast.toString(args.NAME);
-        const sanitizedName = encodeURIComponent(loginLocation.substring(0, 256).replace(/[^a-zA-Z0-9 _\-\.\[\]\(\)]+/gmi, ""));
-        const waitingLink = `https://studio.penguinmod.com/scratchAuthExt.html?openLocation=${encodeURIComponent(window.origin)}`;
-
-        // listen for events before opening
-        let login;
-        let finished = false;
-        const listener = (event) => {
-            if (event.origin !== (new URL(waitingLink)).origin) {
-                return;
-            }
-            if (!(event.data && event.data.scratchauthd1)) {
-                return;
-            }
-
-            const data = event.data.scratchauthd1;
-
-            const privateCode = data.pv;
-            currentPrivateCode = privateCode;
-
-            // update status
-            this.promptStatus.inProgress = false;
-            this.promptStatus.completed = true;
-
-            finished = true;
-            window.removeEventListener("message", listener);
-            login.close();
-        };
-        window.addEventListener("message", listener);
-
-        // open prompt
-        login = window.open(
-            `https://auth.itinerary.eu.org/auth/?redirect=${btoa(waitingLink)}${sanitizedName.length > 0 ? `&name=${sanitizedName}` : ""}`,
-            "Scratch Authentication",
-            `scrollbars=yes,resizable=yes,status=no,location=yes,toolbar=no,menubar=no,width=768,height=512,left=200,top=200`
-        );
-        if (!login) {
-            // popup was blocked most likely
-            this.promptStatus.inProgress = false;
-            this.promptStatus.blocked = true;
-            return;
-        }
-
-        // .onclose doesnt work on most platforms it seems
-        // so just set interval
-        const closedInterval = setInterval(() => {
-            if (!login.closed) return;
-
-            this.promptStatus.inProgress = false;
-            if (!finished) {
-                this.promptStatus.userClosed = true;
-            }
-            window.removeEventListener("message", listener);
-            clearInterval(closedInterval);
-        }, 500);
-    }
-    privateCode() {
-        const code = currentPrivateCode;
-        currentPrivateCode = '';
-        return code;
-    }
-    serverRedirectLocation() {
-        const waitingLink = `https://studio.penguinmod.com/scratchAuthExt.html?openLocation=${window.origin}`;
-        return waitingLink;
-    }
-    getPromptStatus(args) {
-        const option = Cast.toString(args.STATUS);
-        if (!(option in this.promptStatus)) return false;
-        return this.promptStatus[option];
-    }
-
-    // parsing privat4e code blocks
-    async validLogin() {
-        if (Object.keys(this.loginInfo).length <= 0) {
-            try {
-                await this.parseLoginCode_();
-            } catch {
-                // just say invalid if we cant parse
-                return false;
-            }
-        }
-        return !!this.loginInfo.valid;
-    }
-    async scratchUsername() {
-        if (Object.keys(this.loginInfo).length <= 0) {
-            try {
-                await this.parseLoginCode_();
-            } catch {
-                // just say no username if we cant parse
-                return '';
-            }
-        }
-        return Cast.toString(this.loginInfo.username);
-    }
-
-    // legacy block
-    authenticate(...args) {
-        return Legacy.authenticate(this, ...args);
     }
 }
 

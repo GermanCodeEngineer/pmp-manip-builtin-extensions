@@ -1,18 +1,6 @@
 const formatMessage = require('format-message');
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const SandboxRunner = require('../../util/sandboxed-javascript-runner');
-const beatgammit = {
-    deflate: require('./beatgammit-deflate'),
-    inflate: require('./beatgammit-inflate')
-};
-const {
-    validateArray
-} = require('../../util/json-block-utilities');
-const ArrayBufferUtil = require('../../util/array buffer');
-const BufferParser = new ArrayBufferUtil();
-const Cast = require('../../util/cast');
-// const Cast = require('../../util/cast');
 
 const warningIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAC8SURBVDhPpZPBDYMwDEWhJw4MQzdgG0bi0APDlHuPZRv6X2xUaqJWpE8y2Pk/JkRJFVnXtVOMiqdig5yxzm1HJDZu+gWexqcZDCjuqHtcRo/gfTdRkf2yy7kGMG4i/5wlGYSXObqL9MFsRQw06C0voq9ZhxcHasH7m4cV/AUNFkuLWGgwW17EzB5wPB9Wn+aanmoysVGRJAovI5PLydAqzh7l1mWDAUV2JQE8n5P3SORo3xTxOjMWrnNVvQChGZRpEqnWPQAAAABJRU5ErkJggg==";
 
@@ -27,30 +15,6 @@ class JgPrismBlocks {
          * @type {Runtime}
          */
         this.runtime = runtime;
-        this.audioPlayer = new Audio();
-        this.isJSPermissionGranted = false;
-        this.isCameraScreenshotEnabled = false;
-
-        this.mouseScrollDelta = { x: 0, y: 0, z: 0 };
-        addEventListener("wheel", e => {
-            this.mouseScrollDelta.x = e.deltaX;
-            this.mouseScrollDelta.y = e.deltaY;
-            this.mouseScrollDelta.z = e.deltaZ;
-        });
-        setInterval(() => {
-            this.mouseScrollDelta = { x: 0, y: 0, z: 0 };
-        }, 65);
-
-        this.encodeCharacterLength = 6;
-    }
-
-
-    /**
-     * dummy function for reseting user provided permisions when a save is loaded
-     */
-    deserialize() {
-        this.isJSPermissionGranted = false;
-        this.isCameraScreenshotEnabled = false;
     }
 
     /**

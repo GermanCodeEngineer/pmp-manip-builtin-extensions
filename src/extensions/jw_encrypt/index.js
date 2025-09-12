@@ -56,10 +56,6 @@ class jwEncrypt {
             }
         };
     }
-
-    encrypt() {
-        return "test";
-    }
 }
 
 module.exports = jwEncrypt;

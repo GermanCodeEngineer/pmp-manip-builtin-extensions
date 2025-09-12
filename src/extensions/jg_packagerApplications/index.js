@@ -1,7 +1,6 @@
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const Cast = require('../../util/cast');
-const Icon = require('./icon.svg');
+const Icon = null; // Icons do not matter
 
 class JgPackagerApplicationsBlocks {
     constructor(runtime) {
@@ -179,82 +178,6 @@ class JgPackagerApplicationsBlocks {
                 },
             ]
         };
-    }
-
-    // blocks
-    isPackaged() {
-        return this.runtime.isPackaged;
-    }
-    moveWindow(args) {
-        const x = Cast.toNumber(args.X);
-        const y = Cast.toNumber(args.Y);
-        window.moveTo(x, y);
-    }
-    setX(args) {
-        const x = Cast.toNumber(args.X);
-        const y = window.screenY;
-        window.moveTo(x, y);
-    }
-    changeX(args) {
-        const x = Cast.toNumber(args.X);
-        window.moveBy(x, 0);
-    }
-    setY(args) {
-        const x = window.screenX;
-        const y = Cast.toNumber(args.Y);
-        window.moveTo(x, y);
-    }
-    changeY(args) {
-        const y = Cast.toNumber(args.Y);
-        window.moveBy(0, y);
-    }
-    windowX() {
-        return window.screenLeft;
-    }
-    windowY() {
-        return window.screenTop;
-    }
-    resizeWindow(args) {
-        const width = Cast.toNumber(args.WIDTH);
-        const height = Cast.toNumber(args.HEIGHT);
-        window.resizeTo(width, height);
-    }
-    windowWidth() {
-        return window.outerWidth;
-    }
-    windowHeight() {
-        return window.outerHeight;
-    }
-    screenWidth() {
-        return screen.width;
-    }
-    screenHeight() {
-        return screen.height;
-    }
-    enableFullscreen() {
-        document.documentElement.requestFullscreen();
-    }
-    exitFullscreen() {
-        document.exitFullscreen();
-    }
-    isFullscreen() {
-        if (document.fullscreenElement) {
-            return true;
-        }
-        return false;
-    }
-    setWindowName(args) {
-        const name = Cast.toString(args.NAME);
-        document.title = name;
-    }
-    getWindowName() {
-        return document.title;
-    }
-    isFocused() {
-        return document.hasFocus();
-    }
-    closeWindow() {
-        window.close();
     }
 }
 

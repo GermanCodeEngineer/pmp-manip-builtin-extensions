@@ -1,18 +1,16 @@
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const UI = require('./helper.js');
-const Cast = require('../../util/cast');
-const Icons = {
-    Mouse: require('./mouse.png'),
-    Button: require('./button.png'),
-    Text: require('./text.png'),
-    Textarea: require('./textarea.png'),
-    Box: require('./box.png'),
-    ScrollingBox: require('./scrollingbox.png'),
-    Checkbox: require('./checkbox.png'),
-    Dropdown: require('./dropdown.png'),
-    Multiselect: require('./multiselect.png'),
-    Slider: require('./slider.png'),
+const Icons = { // Icons do not matter
+    Mouse: null,
+    Button: null,
+    Text: null,
+    Textarea: null,
+    Box: null,
+    ScrollingBox: null,
+    Checkbox: null,
+    Dropdown: null,
+    Multiselect: null,
+    Slider: null,
 }
 
 /**
@@ -26,7 +24,6 @@ class jgAdvancedText {
          * @type {runtime}
          */
         this.runtime = runtime;
-        this.UIClient = new UI(runtime);
     }
 
     /**
@@ -188,41 +185,6 @@ class jgAdvancedText {
                 },
             ]
         };
-    }
-
-    // util
-    createElement(type, properties) {
-        const element = new UI.Button(this.UIClient, properties);
-    }
-
-    // blocks
-    createButton(args) {
-        this.createElement('Button', {
-            id: Cast.toString(args.NAME),
-            label: Cast.toString(args.TEXT),
-            shown: true
-        })
-    }
-    createTextInput(args) {
-
-    }
-    createTextBox(args) {
-
-    }
-    createDropdown(args) {
-
-    }
-    createCheckbox(args) {
-
-    }
-    createScrollingArea(args) {
-
-    }
-    createMultiselect(args) {
-
-    }
-    createGroup(args) {
-
     }
 }
 

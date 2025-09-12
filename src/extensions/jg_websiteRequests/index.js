@@ -1,9 +1,6 @@
 const formatMessage = require('format-message');
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const AHHHHHHHHHHHHHH = require('../../util/array buffer');
-const BufferStuff = new AHHHHHHHHHHHHHH();
-// const Cast = require('../../util/cast');
 
 /**
  * Class for Website Request blocks
@@ -146,84 +143,6 @@ class JgWebsiteRequestBlocks {
                 }
             ]
         };
-    }
-    encodeTextForURL (args) {
-        return encodeURIComponent(String(args.TEXT));
-    }
-    decodeUrlForText (args) {
-        return decodeURI(String(args.TEXT));
-    }
-
-    getWebsiteContent (args) {
-        return new Promise(resolve => {
-            if (window && !window.fetch) return resolve("");
-            const fetchingUrl = args.WEBSITE.replace("rawRequest()", "");
-            fetch(fetchingUrl, {cache: "no-cache"}).then(r => {
-                r.text().then(text => {
-                    resolve(String(text));
-                })
-                    .catch(() => {
-                        resolve("");
-                    });
-            })
-                .catch(() => {
-                    resolve("");
-                });
-        });
-    }
-    
-    getWebsiteBinaryData (args) {
-        return new Promise(resolve => {
-            if (window && !window.fetch) return resolve("[]");
-            const fetchingUrl = args.WEBSITE.replace("rawRequest()", "");
-            fetch(fetchingUrl, {cache: "no-cache"}).then(r => {
-                r.arrayBuffer().then(buffer => {
-                    resolve(String(JSON.stringify(BufferStuff.bufferToArray(buffer))));
-                })
-                    .catch(() => {
-                        resolve("[]");
-                    });
-            })
-                .catch(() => {
-                    resolve("[]");
-                });
-        });
-    }
-
-    postWithContentToWebsite (args) {
-        return new Promise(resolve => {
-            if (window && !window.fetch) return resolve("");
-            const body = {};
-            const checking = String(args.CONTENT);
-            let canJSONParse = true;
-            try {
-                JSON.parse(checking);
-            } catch {
-                canJSONParse = false;
-            }
-            body[String(args.KEY)] = checking === "true" ? true :
-                checking === "false" ? false :
-                    Number(checking) ? Number(checking) :
-                        checking === "null" ? null :
-                            canJSONParse ? JSON.parse(checking) :
-                                checking;
-            fetch(args.WEBSITE, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                cache: "no-cache",
-                body: JSON.stringify(body)
-            }).then(r => {
-                r.text().then(text => {
-                    resolve(String(text));
-                })
-                    .catch(() => {
-                        resolve("");
-                    });
-            })
-                .catch(() => {
-                    resolve("");
-                });
-        });
     }
 }
 

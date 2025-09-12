@@ -1,6 +1,5 @@
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const Cast = require('../../util/cast');
 
 class JgScriptsBlocks {
   /**
@@ -13,10 +12,6 @@ class JgScriptsBlocks {
      * @type {Runtime}
      */
     this.runtime = runtime;
-    this.scripts = {};
-
-    this.runtime.on("PROJECT_START", () => { this.scripts = {} });
-    this.runtime.on("PROJECT_STOP_ALL", () => { this.scripts = {} });
   }
   /**
    * @returns {object} metadata for this extension and its blocks.
@@ -138,111 +133,6 @@ class JgScriptsBlocks {
         TARGETS: { acceptReporters: true, items: "getTargets" }
       },
     };
-  }
-
-  getTargets() {
-    const spriteNames = [
-      { text: "myself", value: "_myself_" },
-      { text: "Stage", value: "_stage_" }
-    ];
-    const targets = this.runtime.targets;
-    for (let index = 1; index < targets.length; index++) {
-      const target = targets[index];
-      if (target.isOriginal) spriteNames.push({
-        text: target.getName(), value: target.getName()
-      });
-    }
-    return spriteNames.length > 0 ? spriteNames : [""];
-  }
-
-  createScript(args) { this.scripts[Cast.toString(args.NAME)] = { blocks: [] } }
-
-  deleteScript(args) { delete this.scripts[Cast.toString(args.NAME)] }
-
-  deleteAll() { this.scripts = {} }
-
-  allScripts() { return JSON.stringify(Object.keys(this.scripts)) }
-
-  scriptExists(args) { return Cast.toBoolean(this.scripts[args.NAME]) }
-
-  addBlocksTo(args, util) {
-    const name = Cast.toString(args.NAME);
-    const branch = util.thread.target.blocks.getBranch(util.thread.peekStack(), 1);
-    if (branch && this.scripts[name] !== undefined) {
-      this.scripts[name].blocks.push({ stack : branch, target : util.target });
-    }
-  }
-
-  JGreturn(args, util) { util.thread.report = Cast.toString(args.THING) }
-
-  scriptData(args, util) {
-    const data = util.thread.scriptData;
-    return data ? data : "";
-  }
-
-  runBlocksData(args, util) { this.runBlocks(args, util) }
-  runBlocks(args, util) {
-    const target = args.SPRITE === "_myself_" ? util.target :
-      args.SPRITE === "_stage_" ? this.runtime.getTargetForStage() : this.runtime.getSpriteTargetByName(args.SPRITE);
-    const name = Cast.toString(args.NAME);
-    const data = args.DATA ? Cast.toString(args.DATA) : "";
-    if (this.scripts[name] === undefined || !target) return;
-
-    if (util.stackFrame.JGindex === undefined) util.stackFrame.JGindex = 0;
-    if (util.stackFrame.JGthread === undefined) util.stackFrame.JGthread = "";
-    const blocks = this.scripts[name].blocks;
-    const index = util.stackFrame.JGindex;
-    const thread = util.stackFrame.JGthread;
-    if (!thread && index < blocks.length) {
-      const thisStack = blocks[index];
-      if (thisStack.target.blocks.getBlock(thisStack.stack) !== undefined) {
-        util.stackFrame.JGthread = this.runtime._pushThread(thisStack.stack, thisStack.target, { stackClick: false });
-        util.stackFrame.JGthread.scriptData = data;
-        util.stackFrame.JGthread.target = target;
-        util.stackFrame.JGthread.tryCompile(); // update thread
-      }
-      util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
-    }
-
-    if (util.stackFrame.JGthread && this.runtime.isActiveThread(util.stackFrame.JGthread)) util.startBranch(1, true);
-    else util.stackFrame.JGthread = "";
-    if (util.stackFrame.JGindex < blocks.length) util.startBranch(1, true);
-  }
-
-  reportBlocksData(args, util) { return this.reportBlocks(args, util) || "" }
-  reportBlocks(args, util) {
-    const target = args.SPRITE === "_myself_" ? util.target :
-      args.SPRITE === "_stage_" ? this.runtime.getTargetForStage() : this.runtime.getSpriteTargetByName(args.SPRITE);
-    const name = Cast.toString(args.NAME);
-    const data = args.DATA ? Cast.toString(args.DATA) : "";
-    if (this.scripts[name] === undefined || !target) return;
-
-    if (util.stackFrame.JGindex === undefined) util.stackFrame.JGindex = 0;
-    if (util.stackFrame.JGthread === undefined) util.stackFrame.JGthread = "";
-    const blocks = this.scripts[name].blocks;
-    const index = util.stackFrame.JGindex;
-    const thread = util.stackFrame.JGthread;
-    if (!thread && index < blocks.length) {
-      const thisStack = blocks[index];
-      if (thisStack.target.blocks.getBlock(thisStack.stack) !== undefined) {
-        util.stackFrame.JGthread = this.runtime._pushThread(thisStack.stack, thisStack.target, { stackClick: false });
-        util.stackFrame.JGthread.scriptData = data;
-        util.stackFrame.JGthread.target = target;
-        util.stackFrame.JGthread.tryCompile(); // update thread
-      }
-      util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
-    }
-
-    if (util.stackFrame.JGthread && this.runtime.isActiveThread(util.stackFrame.JGthread)) util.yield();
-    else {
-      if (util.stackFrame.JGthread.report !== undefined) {
-        util.stackFrame.JGreport = util.stackFrame.JGthread.report;
-        util.stackFrame.JGindex = blocks.length + 1;
-      }
-      util.stackFrame.JGthread = "";
-    }
-    if (util.stackFrame.JGindex < blocks.length) util.yield();
-    return util.stackFrame.JGreport || "";
   }
 }
 

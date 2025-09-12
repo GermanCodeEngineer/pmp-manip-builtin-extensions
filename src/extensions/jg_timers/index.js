@@ -1,7 +1,5 @@
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const Cast = require('../../util/cast');
-const Timer = require('./Timer');
 
 /**
  * Class for Timers blocks
@@ -14,20 +12,6 @@ class JgTimersBlocks {
          * @type {Runtime}
          */
         this.runtime = runtime;
-        this.timers = {};
-        // pause/unpause timers when the project pauses
-        runtime.on("RUNTIME_PAUSED", () => {
-            this._getTimersArray().forEach(timer => timer.instance.pause(true));
-        });
-        runtime.on("RUNTIME_UNPAUSED", () => {
-            this._getTimersArray().forEach(timer => timer.instance.start(true));
-        });
-    }
-
-    // util
-
-    _getTimersArray() {
-        return Object.values(this.timers);
     }
 
     /**
@@ -159,89 +143,6 @@ class JgTimersBlocks {
                 }
             }
         };
-    }
-
-    // blocks
-
-    createTimer(args) {
-        const timer = this.timers[args.NAME];
-        if (timer) return;
-        this.timers[args.NAME] = {
-            name: Cast.toString(args.NAME),
-            instance: new Timer()
-        };
-    }
-    deleteTimer(args) {
-        const timer = this.timers[args.NAME];
-        if (!timer) return;
-        delete this.timers[args.NAME];
-    }
-    deleteAllTimer() {
-        this.timers = {};
-    }
-
-    getTimer(args) {
-        const timer = this.timers[args.NAME];
-        if (!timer) return "";
-        const time = timer.instance.getTime(true);
-        return Cast.toNumber(time);
-    }
-    getTimerData(args) {
-        const timer = this.timers[args.NAME];
-        if (!timer) return "";
-        const seconds = Cast.toNumber(timer.instance.getTime(true));
-        switch (args.DATA) {
-            case "milliseconds":
-                return seconds * 1000;
-            case "minutes":
-                return Math.floor(seconds / 60);
-            case "hours":
-                return Math.floor(seconds / 3600);
-            case "days":
-                return Math.floor(seconds / 86400);
-            case "weeks":
-                return Math.floor(seconds / 604800);
-            case "years":
-                return Math.floor(seconds / 31536000);
-            default:
-                return seconds;
-        }
-    }
-    existsTimer(args) {
-        const timer = this.timers[args.NAME];
-        if (!timer) return false;
-        return true;
-    }
-    getAllTimer() {
-        return JSON.stringify(this._getTimersArray().map(timer => timer.name));
-    }
-
-    startTimer(args) {
-        const timer = this.timers[args.NAME];
-        if (!timer) return;
-        timer.instance.start();
-    }
-    pauseTimer(args) {
-        const timer = this.timers[args.NAME];
-        if (!timer) return;
-        timer.instance.pause();
-    }
-    stopTimer(args) {
-        const timer = this.timers[args.NAME];
-        if (!timer) return;
-        timer.instance.stop();
-    }
-    resetTimer(args) {
-        const timer = this.timers[args.NAME];
-        if (!timer) return;
-        timer.instance.reset();
-    }
-
-    addTimer(args) {
-        const timer = this.timers[args.NAME];
-        if (!timer) return;
-        const seconds = Cast.toNumber(args.SECONDS);
-        timer.instance.add(seconds * 1000);
     }
 }
 

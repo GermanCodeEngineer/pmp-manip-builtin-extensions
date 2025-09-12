@@ -1,8 +1,6 @@
 const formatMessage = require('format-message');
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const { validateRegex } = require('../../util/json-block-utilities')
-// const Cast = require('../../util/cast');
 
 const blockIconURI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAAFACAMAAAD6TlWYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAPUExURQAAAP+xNQDiGgCU/wAAAJEQGGoAAAAFdFJOU/////8A+7YOUwAAAAlwSFlzAAAOwwAADsMBx2+oZAAABA5JREFUeF7t0EtuW0EUA9F8vP81Z8JRAwzbLuk5COoMBb1LdP34EGJAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEHos4M+HZfbtDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0KPBfxfGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEZsBfh/z8z/r9SfnsywwIGRAyIGRAyICQASEDQp8OeMrfvk06vEzOXjPgIWevGfCQs9cMeMjZawY85Ow1Ax5y9poBDzl7zYCHnL2GA57y2dvlvW+TmcmARWYmAxaZmQxYZGYyYJGZyYBFZiYDFpmZDFhkZnp5wFPOvFze+TaZmQxYZGYyYJGZyYBFZiYDFpmZDFhkZjJgkZnJgEVmprcHPOXsl+V9j8lsZcAhs5UBh8xWBhwyWxlwyGxlwCGzlQGHzFYGHDJbPR7wlJlreddjMlsZcMhsZcAhs5UBh8xWBhwyWxlwyGxlwCGzlQGHzFbfHvCU2SrvekxmKwMOma0MOGS2MuCQ2cqAQ2YrAw6ZrQw4ZLYy4JDZyoBDZisDDpmtDDhktjLgkNnKgENmKwMOma0MOGS2MuCQ2erbA2bmWt71mMxWBhwyWxlwyGxlwCGzlQGHzFYGHDJbGXDIbGXAIbPV4wFz9svyrsdktjLgkNnKgENmKwMOma0MOGS2MuCQ2cqAQ2YrAw6Zrd4eMGdeLu97m8xMBiwyMxmwyMxkwCIzkwGLzEwGLDIzGbDIzGTAIjPTywPms7fLO98mM5MBi8xMBiwyMxmwyMxkwCIzkwGLzEwGLDIzGbDIzIQD5m/fJu99mZy9ZsBDzl4z4CFnrxnwkLPXDHjI2WsGPOTsNQMecvaaAQ85e+3TAfPzPysdruWzLzMgZEDIgJABIQNCBoQMCM2A+jsDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgMjHxx+IPExM0h8siAAAAABJRU5ErkJggg=="
 
@@ -17,7 +15,6 @@ class jwUnite {
          * @type {Runtime}
          */
         this.runtime = runtime;
-        alert('unite is deprecated, please use the blocks in the toolbox')
     }
 
     /**
@@ -531,158 +528,6 @@ class jwUnite {
                 */
             }
         };
-    }
-    /*
-    getAllSprites() {
-        return this.runtime.targets.map(x => {
-            return {
-                text: x.sprite ? x.sprite.name : `Unkown ${x.id}`,
-                value: x.id
-            }
-        })
-    */
-
-    replacers = {}
-    knownLinks = {}
-
-    whenanything(args, util) {
-        return Boolean(args.ANYTHING || false)
-    }
-
-    backToGreenFlag(args, util) {
-        if (vm) vm.greenFlag()
-    }
-
-    trueBoolean() {return true}
-    falseBoolean() {return false}
-    randomBoolean() {return Boolean(Math.round(Math.random()))}
-
-    indexOfTextInText(args, util) {
-        const lookfor = String(args.TEXT1);
-        const searchin = String(args.TEXT2);
-        let index = 0;
-        if (searchin.includes(lookfor)) {
-            index = searchin.indexOf(lookfor) + 1;
-        }
-        return index;
-    }
-    getLettersFromIndexToIndexInText(args, util) {
-        const index1 = (Number(args.INDEX1) ? Number(args.INDEX1) : 1) - 1;
-        const index2 = (Number(args.INDEX2) ? Number(args.INDEX2) : 1) - 1;
-        const string = String(args.TEXT);
-        const substring = string.substring(index1, index2);
-        return substring;
-    }
-    readLineInMultilineText(args, util) {
-        const line = (Number(args.LINE) ? Number(args.LINE) : 1) - 1;
-        const text = String(args.TEXT);
-        const readline = text.split("\n")[line] || "";
-        return readline;
-    }
-    newLine() { return "\n" }
-    stringify(args, util) {return args.ONE}
-
-    lerpFunc(args, util) {
-        const one = isNaN(Number(args.ONE)) ? 0 : Number(args.ONE);
-        const two = isNaN(Number(args.TWO)) ? 0 : Number(args.TWO);
-        const amount = isNaN(Number(args.AMOUNT)) ? 0 : Number(args.AMOUNT);
-        let lerped = one;
-        lerped += ((two - one) / (amount / (amount * amount)));
-        return lerped;
-    }
-    advMath(args, util) {
-        const one = isNaN(Number(args.ONE)) ? 0 : Number(args.ONE)
-        const two = isNaN(Number(args.TWO)) ? 0 : Number(args.TWO)
-        const operator = String(args.OPTION)
-        switch(operator) {
-            case "^": return one ** two
-            case "root": return one ** 1/two
-            case "log": return Math.log(two) / Math.log(one)
-            default: return 0
-        }
-    }
-
-    setReplacer(args, util) {
-        this.replacers["{" + String(args.REPLACER) + "}"] = String(args.VALUE || "")
-    }
-    replaceWithReplacers(args, util) {
-        let string = String(args.STRING || "")
-        for (const replacer of Object.keys(this.replacers)) {
-            string = string.replaceAll(replacer, this.replacers[replacer])
-        }
-        return string
-    }
-
-    thing_is_number(args, util) {
-        // i hate js
-        // i also hate regex
-        // so im gonna do this the lazy way
-        // no. String(Number(value)) === value does infact do the job X)
-        // also what was originaly here was inificiant as hell
-        return String(Number(args.TEXT1)) == args.TEXT1 && !isNaN(Number(args.TEXT1))
-    }
-    thing_is_text(args, util) {
-        // WHY IS NAN NOT EQUAL TO ITSELF
-        // HOW IS NAN A NUMBER
-        // because nan is how numbers say the value put into me is not a number
-        return isNaN(Number(args.TEXT1))
-    }
-
-    if_return_else_return(args) {
-        return args.boolean ? args.TEXT1 : args.TEXT2
-    }
-    mobile(args, util) {
-        return navigator.userAgent.includes("Mobile") || window.matchMedia("(max-width: 767px)").matches
-    }
-    getspritewithattrib(args, util) {
-        // strip out usless data
-        const sprites = util.runtime.targets.map(x => {
-            return {
-                id: x.id, 
-                name: x.sprite ? x.sprite.name : "Unkown",
-                variables: Object.values(x.variables).reduce((obj, value) => {
-                    if (!value.name) return obj
-                    obj[value.name] = String(value.value)
-                    return obj
-                }, {})
-            }
-        })
-        // get the target with variable x set to y
-        let res = "No sprites found"
-        for (
-            // define the index and the sprite
-            let idx = 1, sprite = sprites[0]; 
-            // standard for loop thing
-            idx < sprites.length;
-            // set sprite to a new item  
-            sprite = sprites[idx++]
-        ) {
-            if (sprite.variables[args.var] == args.val) {
-                res = `{"id": "${sprite.id}", "name": "${sprite.name}"}`
-                break
-            }
-        }
-        
-        return res
-    }
-
-    constrainnumber(args) {
-        return Math.min(Math.max(args.min, args.inp), args.max)
-    }
-
-    regextest(args) {
-        if (!validateRegex(args.reg)) return false
-        const regex = new RegExp(args.reg)
-        return regex.test(args.text)
-    }
-    regexmatch(args) {
-        if (!validateRegex(args.reg)) return "[]"
-        const regex = new RegExp(args.reg)
-        const matches = args.text.match(regex)
-        return JSON.stringify(matches ? matches : [])
-    }
-    replaceAll(args) {
-        return args.text.replaceAll(args.term, args.res)
     }
 }
 

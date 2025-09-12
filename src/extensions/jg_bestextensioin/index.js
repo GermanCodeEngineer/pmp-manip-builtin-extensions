@@ -1,5 +1,4 @@
 const BlockType = require('../../extension-support/block-type');
-const ArgumentType = require('../../extension-support/argument-type');
 
 /**
  * Class for blocks
@@ -12,37 +11,6 @@ class JgBestExtensionBlocks {
          * @type {Runtime}
          */
         this.runtime = runtime;
-
-        /**
-         * @type {HTMLVideoElement}
-         */
-        this.videoElement = null;
-
-        this.runtime.on('PROJECT_STOP_ALL', () => {
-            if (!this.videoElement) return;
-            this.videoElement.remove();
-            this.videoElement = null;
-        });
-        this.runtime.on('RUNTIME_PAUSED', () => {
-            if (!this.videoElement) return;
-            this.videoElement.pause();
-        });
-        this.runtime.on('RUNTIME_UNPAUSED', () => {
-            if (!this.videoElement) return;
-            this.videoElement.play();
-        });
-        this.runtime.on('BEFORE_EXECUTE', () => {
-            this.setVolumeProperly();
-        });
-    }
-
-    setVolumeProperly() {
-        if (!this.videoElement) return;
-        try {
-            this.videoElement.volume = this.runtime.audioEngine.inputNode.gain.value * 0.5;
-        } catch {
-            // well that sucks
-        }
     }
 
     /**
@@ -63,29 +31,6 @@ class JgBestExtensionBlocks {
                     disableMonitor: false
                 }
             ]
-        };
-    }
-
-    ohioBlock() {
-        if (this.videoElement) return;
-
-        const canvas = this.runtime.renderer.canvas;
-        if (!canvas) return;
-        if (!canvas.parentElement) return;
-
-        const video = document.createElement("video");
-        video.style = 'width: 100%; height: 100%; z-index: 10000; position: absolute; left: 0; top: 0;';
-        video.innerHTML = '<source src="https://penguinmod.com/bx-tv1.mp4" type="video/mp4">'
-            + '<source src="https://penguinmod.com/vr/themes/selection.mp3" type="audio/mpeg">';
-        this.videoElement = video;
-        canvas.parentElement.appendChild(video);
-
-        this.setVolumeProperly();
-        video.play();
-
-        video.onended = () => {
-            video.remove();
-            this.videoElement = null;
         };
     }
 }

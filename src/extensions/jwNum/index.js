@@ -1,51 +1,8 @@
 const BlockType = require('../../extension-support/block-type')
-const BlockShape = require('../../extension-support/block-shape')
 const ArgumentType = require('../../extension-support/argument-type')
-const Cast = require('../../util/cast')
-
-const ExpantaNum = require('./expantanum.js')
-
-function span(text) {
-    let el = document.createElement('span')
-    el.innerHTML = text
-    el.style.display = 'hidden'
-    el.style.whiteSpace = 'nowrap'
-    el.style.width = '100%'
-    el.style.textAlign = 'center'
-    return el
-}
-
-class NumType {
-    customId = "jwNum"
-
-    number = ExpantaNum(0)
-
-    constructor(x) {
-        this.number = ExpantaNum(x)
-    }
-
-    static toNum(x) {
-        if (x instanceof NumType) return new NumType(x.number)
-        try {
-            let parsed = JSON.parse(x)
-            if (typeof parsed == 'object') return new NumType(parsed)
-        } catch {}
-        return new NumType(x)
-    }
-
-    jwArrayHandler() {
-        return this.number.toStringWithDecimalPlaces(3)
-    }
-
-    toString() {
-        return this.number.toStringWithDecimalPlaces(7)
-    }
-    toMonitorContent = () => span(this.toString())
-    toReporterContent = () => span(this.toString())
-}
 
 const jwNum = {
-    Type: NumType,
+    Type: class {}, // not needed
     Block: {
         blockType: BlockType.REPORTER,
         forceOutputType: "jwNum",
@@ -56,25 +13,10 @@ const jwNum = {
         defaultValue: "10",
         exemptFromNormalization: true
     },
-    ExpantaNum
+    ExpantaNum: null // not needed
 }
 
 class Extension {
-    constructor() {
-        vm.jwNum = jwNum
-        vm.runtime.registerSerializer(
-            "jwNum",
-            v => v.number.toJSON(),
-            v => {
-                let x = new ExpantaNum(0)
-                try {
-                    x = ExpantaNum.fromJSON(v)
-                } catch {}
-                return new jwNum.Type(x)
-            }
-        )
-    }
-
     getInfo() {
         return {
             id: "jwNum",
@@ -329,188 +271,6 @@ class Extension {
                 },
             }
         }
-    }
-
-    add({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return new jwNum.Type(A.number.add(B.number))
-    }
-
-    sub({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return new jwNum.Type(A.number.sub(B.number))
-    }
-
-    mul({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return new jwNum.Type(A.number.mul(B.number))
-    }
-
-    div({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return new jwNum.Type(A.number.div(B.number))
-    }
-
-    pow({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return new jwNum.Type(A.number.pow(B.number))
-    }
-
-    fact({A}) {
-        A = jwNum.Type.toNum(A)
-
-        return new jwNum.Type(A.number.fact())
-    }
-
-    eq({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return A.number.eq(B.number)
-    }
-
-    gt({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return A.number.gt(B.number)
-    }
-
-    gte({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return A.number.gte(B.number)
-    }
-
-    lt({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return A.number.lt(B.number)
-    }
-
-    lte({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return A.number.lte(B.number)
-    }
-
-    root({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return new jwNum.Type(B.number.root(A.number))
-    }
-
-    ssqrt({A}) {
-        A = jwNum.Type.toNum(A)
-
-        return new jwNum.Type(A.number.ssqrt())
-    }
-
-    log({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return new jwNum.Type(B.number.logBase(A.number))
-    }
-
-    slog({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return new jwNum.Type(B.number.slog(A.number))
-    }
-
-    mod({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return new jwNum.Type(A.number.mod(B.number))
-    }
-
-    round({A, B}) {
-        A = Cast.toString(A).toLowerCase()
-        B = jwNum.Type.toNum(B)
-
-        switch (A) {
-            case "ceiling":
-            case "ceil":
-                return new jwNum.Type(B.number.ceil())
-            case "round":
-                return new jwNum.Type(B.number.round())
-            case "floor":
-                return new jwNum.Type(B.number.floor())
-            default: return new jwNum.Type(B)
-        }
-    }
-
-    isInteger({A}) {
-        A = jwNum.Type.toNum(A)
-
-        return A.number.isint()
-    }
-
-    hyper({A, B, C}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-        C = jwNum.Type.toNum(C)
-
-        return new jwNum.Type(ExpantaNum.hyper(B.number)(A.number, C.number))
-    }
-
-    arrow({A, B, C}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-        C = jwNum.Type.toNum(C)
-
-        return new jwNum.Type(A.number.arrow(B.number)(C.number))
-    }
-
-    reverseArrow({A, B, C}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-        C = jwNum.Type.toNum(C)
-
-        return new jwNum.Type(A.number.arrow_height_inverse(B.number)(C.number))
-    }
-
-    expansion({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = jwNum.Type.toNum(B)
-
-        return new jwNum.Type(A.number.expansion(B.number))
-    }
-
-    toString({A}) {
-        A = jwNum.Type.toNum(A)
-
-        return A.number.toString()
-    }
-
-    toStringD({A, B}) {
-        A = jwNum.Type.toNum(A)
-        B = Cast.toNumber(B)
-
-        return A.number.toStringWithDecimalPlaces(B)
-    }
-
-    toHyperE({A}) {
-        A = jwNum.Type.toNum(A)
-
-        return A.number.toHyperE()
     }
 }
 

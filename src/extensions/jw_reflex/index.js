@@ -1,8 +1,7 @@
 const formatMessage = require('format-message');
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const TargetType = require("../../extension-support/target-type")
-// const Cast = require('../../util/cast');
+const TargetType = require("../../extension-support/target-type");
 
 //const blockIconURI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAAFACAMAAAD6TlWYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAPUExURQAAAP+xNQDiGgCU/wAAAJEQGGoAAAAFdFJOU/////8A+7YOUwAAAAlwSFlzAAAOwwAADsMBx2+oZAAABA5JREFUeF7t0EtuW0EUA9F8vP81Z8JRAwzbLuk5COoMBb1LdP34EGJAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEHos4M+HZfbtDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0KPBfxfGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEZsBfh/z8z/r9SfnsywwIGRAyIGRAyICQASEDQp8OeMrfvk06vEzOXjPgIWevGfCQs9cMeMjZawY85Ow1Ax5y9poBDzl7zYCHnL2GA57y2dvlvW+TmcmARWYmAxaZmQxYZGYyYJGZyYBFZiYDFpmZDFhkZnp5wFPOvFze+TaZmQxYZGYyYJGZyYBFZiYDFpmZDFhkZjJgkZnJgEVmprcHPOXsl+V9j8lsZcAhs5UBh8xWBhwyWxlwyGxlwCGzlQGHzFYGHDJbPR7wlJlreddjMlsZcMhsZcAhs5UBh8xWBhwyWxlwyGxlwCGzlQGHzFbfHvCU2SrvekxmKwMOma0MOGS2MuCQ2cqAQ2YrAw6ZrQw4ZLYy4JDZyoBDZisDDpmtDDhktjLgkNnKgENmKwMOma0MOGS2MuCQ2erbA2bmWt71mMxWBhwyWxlwyGxlwCGzlQGHzFYGHDJbGXDIbGXAIbPV4wFz9svyrsdktjLgkNnKgENmKwMOma0MOGS2MuCQ2cqAQ2YrAw6Zrd4eMGdeLu97m8xMBiwyMxmwyMxkwCIzkwGLzEwGLDIzGbDIzGTAIjPTywPms7fLO98mM5MBi8xMBiwyMxmwyMxkwCIzkwGLzEwGLDIzGbDIzIQD5m/fJu99mZy9ZsBDzl4z4CFnrxnwkLPXDHjI2WsGPOTsNQMecvaaAQ85e+3TAfPzPysdruWzLzMgZEDIgJABIQNCBoQMCM2A+jsDQgaEDAgZEDIgZEDIgJABIQNCBoQMCBkQMiBkQMiAkAEhA0IGhAwIGRAyIGRAyICQASEDQgaEDAgZEDIgZEDIgMjHxx+IPExM0h8siAAAAABJRU5ErkJggg=="
 
@@ -142,68 +141,6 @@ class jwReflex {
                 }
             ]
         };
-    }
-
-    flexes = {}
-
-    _updateFlex(target) {
-        const flex = this.flexes[target.getName()]
-        if (flex && !flex.paused) {
-            target.setXY((((flex.fx)/2)*vm.runtime.stageWidth)+flex.ox,(((flex.fy)/2)*vm.runtime.stageHeight)-flex.oy)
-        }
-    }
-
-    createFlex(args, util) {
-        if (util.target.isSprite() && !Object.keys(this.flexes).includes(util.target.getName())) {
-            this.flexes[util.target.getName()] = {
-                fx: 0,
-                fy: 0,
-                ox: 0,
-                oy: 0,
-            }
-        }
-        console.debug(this.flexes)
-    }
-    updateFlex(args, util) {
-        this._updateFlex(util.target)
-    }
-
-    setFlexXY(args, util) {
-        if (Object.keys(this.flexes).includes(util.target.getName())) {
-            this.flexes[util.target.getName()].fx = Number(args.FX)
-            this.flexes[util.target.getName()].fy = Number(args.FY)
-        }
-    }
-    getFlexX(args, util) {
-        if (Object.keys(this.flexes).includes(util.target.getName())) {
-            return this.flexes[util.target.getName()].fx
-        }
-        return 0
-    }
-    getFlexY(args, util) {
-        if (Object.keys(this.flexes).includes(util.target.getName())) {
-            return this.flexes[util.target.getName()].fy
-        }
-        return 0
-    }
-
-    setOffsetXY(args, util) {
-        if (Object.keys(this.flexes).includes(util.target.getName())) {
-            this.flexes[util.target.getName()].ox = Number(args.OX)
-            this.flexes[util.target.getName()].oy = Number(args.OY)
-        }
-    }
-    getOffsetX(args, util) {
-        if (Object.keys(this.flexes).includes(util.target.getName())) {
-            return this.flexes[util.target.getName()].ox
-        }
-        return 0
-    }
-    getOffsetY(args, util) {
-        if (Object.keys(this.flexes).includes(util.target.getName())) {
-            return this.flexes[util.target.getName()].oy
-        }
-        return 0
     }
 }
 
