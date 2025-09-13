@@ -35,6 +35,7 @@ class pmControlsExpansion {
             blocks: [
                 {
                     opcode: "control_repeatForSeconds",
+                    ppm_final_opcode: true,
                     text: "repeat for [TIMES] seconds",
                     branchCount: 1,
                     blockType: BlockType.CONDITIONAL,
@@ -71,6 +72,7 @@ class pmControlsExpansion {
                 },
                 {
                     opcode: "control_inline_stack_output",
+                    ppm_final_opcode: true,
                     text: "inline block",
                     branchCount: 1,
                     blockType: BlockType.REPORTER, // Technically unknown but behaves like REPORTER+SQUARE
@@ -79,6 +81,7 @@ class pmControlsExpansion {
                 },
                 {
                     opcode: "control_waittick",
+                    ppm_final_opcode: true,
                     text: "wait until next tick",
                     blockType: BlockType.COMMAND,
                 },
@@ -147,21 +150,25 @@ class pmControlsExpansion {
                 },
                 {
                     opcode: "control_get_counter",
+                    ppm_final_opcode: true,
                     text: "counter",
                     blockType: BlockType.REPORTER,
                 },
                 {
                     opcode: "control_incr_counter",
+                    ppm_final_opcode: true,
                     text: "increment counter",
                     blockType: BlockType.COMMAND,
                 },
                 {
                     opcode: "control_decr_counter",
+                    ppm_final_opcode: true,
                     text: "decrement counter",
                     blockType: BlockType.COMMAND,
                 },
                 {
                     opcode: "control_set_counter",
+                    ppm_final_opcode: true,
                     text: "set counter to [VALUE]",
                     blockType: BlockType.COMMAND,
                     arguments: {
@@ -170,6 +177,7 @@ class pmControlsExpansion {
                 },
                 {
                     opcode: "control_clear_counter",
+                    ppm_final_opcode: true,
                     text: "clear counter",
                     blockType: BlockType.COMMAND,
                 },

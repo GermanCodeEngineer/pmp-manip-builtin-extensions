@@ -6,34 +6,10 @@
 
 const ArgumentType = require("../../extension-support/argument-type");
 const BlockType = require("../../extension-support/block-type");
-const Cast = require("../../util/cast");
-
-let input;
-
-let x = 0;
-let y = 0;
-const updatePosition = () => {
-    input.style.transform = `translate(${x}px, ${-y}px)`;
-};
 
 class ColorPicker {
     constructor(runtime) {
         this.runtime = runtime;
-
-        input = document.createElement("input");
-        input.type = "color";
-        input.value = "#9966ff"; // default scratch-paint color
-        input.style.pointerEvents = "none";
-        input.style.width = "1px";
-        input.style.height = "1px";
-        input.style.visibility = "hidden";
-        this.runtime.renderer.addOverlay(input, "scale-centered");
-
-        input.addEventListener("input", () => {
-            this.runtime.startHats("shovelColorPicker_whenChanged");
-        });
-
-        updatePosition();
     }
 
     getInfo() {
@@ -115,48 +91,6 @@ class ColorPicker {
                 },
             },
         };
-    }
-
-    setColor(args) {
-        input.value = args.COLOR;
-    }
-
-    getColorHEX() {
-        return input.value;
-    }
-
-    showPicker() {
-        input.click();
-    }
-
-    getColor(args) {
-        if (args.TYPE === "hex") {
-            return input.value;
-        } else if (args.TYPE == "red") {
-            return Cast.toRgbColorObject(input.value).r;
-        } else if (args.TYPE == "green") {
-            return Cast.toRgbColorObject(input.value).g;
-        } else if (args.TYPE == "blue") {
-            return Cast.toRgbColorObject(input.value).b;
-        } else {
-            return "";
-        }
-    }
-
-    setPos(args) {
-        x = Cast.toNumber(args.X);
-        y = Cast.toNumber(args.Y);
-        updatePosition();
-    }
-
-    getPos(args) {
-        if (args.COORD == "X") {
-            return x;
-        } else if (args.COORD == "Y") {
-            return y;
-        } else {
-            return "";
-        }
     }
 }
 

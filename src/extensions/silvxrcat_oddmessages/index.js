@@ -9,10 +9,6 @@ const icon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWYAAAGACAYAAACeO8iJ
 class OddMessage {
     constructor(runtime) {
         this.runtime = runtime;
-        this.messageQueue = [];
-        this.recording = [];
-        this.logs = [];
-        this.recordingDelay = 1000;
     }
     getInfo() {
         return {
@@ -150,74 +146,6 @@ class OddMessage {
                 },
             },
         }
-    }
-    _getVariableMenu() {
-        const vars = this.runtime.getAllVarNamesOfType('')
-        return vars.length == 0 ? [" "] : vars
-    }
-    _getListMenu() {
-        const lists = this.runtime.getAllVarNamesOfType('list')
-        return lists.length == 0 ? [" "] : lists
-    }
-    log({ a, b }) {
-        this.logs.push({ log: a, type: b });
-    }
-    logClear() {
-        this.logs = [];
-    }
-    logToArray({ n }) {
-        let a = this.logs[n];
-        if (a) {
-            return JSON.stringify([a.log, a.type]);
-        } else {
-            return '[]';
-        }
-    }
-    logToJSON() {
-        return JSON.stringify(this.logs);
-    }
-    emit({ a, b }) {
-        this.messageQueue.push([a, b]);
-    }
-    on({ a, b }) {
-        if (this.messageQueue.length == 0) return false;
-        if (this.messageQueue[0][0] == a) {
-            const stage = this.runtime.getTargetForStage();
-            if (!stage) return true;
-            const variable = stage.lookupVariableByNameAndType(b);
-            if (!variable) return true;
-            variable.value = this.messageQueue[0][1];
-            this.messageQueue.shift();
-            return true
-        } else {
-            return false
-        }
-    }
-    async whenVarChange({ a }) {
-        if (!this.runtime.getTargetForStage().lookupVariableByNameAndType(a)) return false;
-        let b = this.runtime.getTargetForStage().lookupVariableByNameAndType(a).value;
-        await new Promise(resolve => { setTimeout(resolve, 100) });
-        let c = this.runtime.getTargetForStage().lookupVariableByNameAndType(a).value;
-        return b != c;
-    }
-    async recordVar({ a, b }) {
-        if (this.recording.includes(a)) return;
-        const delay = async (ms) => { await new Promise(r => setTimeout(r, ms)) };
-        this.recording.push(a);
-        while (this.recording.includes(a)) {
-            await delay(this.recordingDelay);
-            let c = this.runtime.getTargetForStage().lookupVariableByNameAndType(a).value;
-            let d = this.runtime.getTargetForStage().lookupVariableByNameAndType(b, 'list');
-            d.value.push(c);
-        }
-    }
-    stopRecording({ a }) {
-        if (this.recording.includes(a)) {
-            this.recording.splice(this.recording.indexOf(a), 1);
-        }
-    }
-    setRecordingDelay({ a }) {
-        this.recordingDelay = a;
     }
 }
 

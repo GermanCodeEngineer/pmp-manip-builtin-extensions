@@ -1,13 +1,6 @@
-const Runtime = require('../../engine/runtime');
-
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
-const Clone = require('../../util/clone');
-const Cast = require('../../util/cast');
 const formatMessage = require('format-message');
-const Video = require('../../io/video');
-
-const VideoMotion = require('./library');
 
 /**
  * Icon svg to be displayed in the blocks category menu, encoded as a data URI.
@@ -77,178 +70,6 @@ class Scratch3VideoSensingBlocks {
          * @type {Runtime}
          */
         this.runtime = runtime;
-
-        /**
-         * The motion detection algoritm used to power the motion amount and
-         * direction values.
-         * @type {VideoMotion}
-         */
-        this.detect = new VideoMotion();
-
-        /**
-         * The last millisecond epoch timestamp that the video stream was
-         * analyzed.
-         * @type {number}
-         */
-        this._lastUpdate = null;
-
-        /**
-         * A flag to determine if this extension has been installed in a project.
-         * It is set to false the first time getInfo is run.
-         * @type {boolean}
-         */
-        this.firstInstall = true;
-
-        if (this.runtime.ioDevices) {
-            // Configure the video device with values from globally stored locations.
-            this.runtime.on(Runtime.PROJECT_LOADED, this.updateVideoDisplay.bind(this));
-
-            // Clear target motion state values when the project starts.
-            this.runtime.on(Runtime.PROJECT_RUN_START, this.reset.bind(this));
-
-            // Kick off looping the analysis logic.
-            this._loop();
-        }
-    }
-
-    /**
-     * After analyzing a frame the amount of milliseconds until another frame
-     * is analyzed.
-     * @type {number}
-     */
-    static get INTERVAL () {
-        return 33;
-    }
-
-    /**
-     * Dimensions the video stream is analyzed at after its rendered to the
-     * sample canvas.
-     * @type {Array.<number>}
-     */
-    static get DIMENSIONS () {
-        return [480, 360];
-    }
-
-    /**
-     * The key to load & store a target's motion-related state.
-     * @type {string}
-     */
-    static get STATE_KEY () {
-        return 'Scratch.videoSensing';
-    }
-
-    /**
-     * The default motion-related state, to be used when a target has no existing motion state.
-     * @type {MotionState}
-     */
-    static get DEFAULT_MOTION_STATE () {
-        return {
-            motionFrameNumber: 0,
-            motionAmount: 0,
-            motionDirection: 0
-        };
-    }
-
-    /**
-     * The transparency setting of the video preview stored in a value
-     * accessible by any object connected to the virtual machine.
-     * @type {number}
-     */
-    get globalVideoTransparency () {
-        const stage = this.runtime.getTargetForStage();
-        if (stage) {
-            return stage.videoTransparency;
-        }
-        return 50;
-    }
-
-    set globalVideoTransparency (transparency) {
-        const stage = this.runtime.getTargetForStage();
-        if (stage) {
-            stage.videoTransparency = transparency;
-        }
-        return transparency;
-    }
-
-    /**
-     * The video state of the video preview stored in a value accessible by any
-     * object connected to the virtual machine.
-     * @type {number}
-     */
-    get globalVideoState () {
-        const stage = this.runtime.getTargetForStage();
-        if (stage) {
-            return stage.videoState;
-        }
-        // Though the default value for the stage is normally 'on', we need to default
-        // to 'off' here to prevent the video device from briefly activating
-        // while waiting for stage targets to be installed that say it should be off
-        return VideoState.OFF;
-    }
-
-    set globalVideoState (state) {
-        const stage = this.runtime.getTargetForStage();
-        if (stage) {
-            stage.videoState = state;
-        }
-        return state;
-    }
-
-    /**
-     * Get the latest values for video transparency and state,
-     * and set the video device to use them.
-     */
-    updateVideoDisplay () {
-        this.setVideoTransparency({
-            TRANSPARENCY: this.globalVideoTransparency
-        });
-        this.videoToggle({
-            VIDEO_STATE: this.globalVideoState
-        });
-    }
-
-    /**
-     * Reset the extension's data motion detection data. This will clear out
-     * for example old frames, so the first analyzed frame will not be compared
-     * against a frame from before reset was called.
-     */
-    reset () {
-        this.detect.reset();
-
-        const targets = this.runtime.targets;
-        for (let i = 0; i < targets.length; i++) {
-            const state = targets[i].getCustomState(Scratch3VideoSensingBlocks.STATE_KEY);
-            if (state) {
-                state.motionAmount = 0;
-                state.motionDirection = 0;
-            }
-        }
-    }
-
-    /**
-     * Occasionally step a loop to sample the video, stamp it to the preview
-     * skin, and add a TypedArray copy of the canvas's pixel data.
-     * @private
-     */
-    _loop () {
-        setTimeout(this._loop.bind(this), Math.max(this.runtime.currentStepTime, Scratch3VideoSensingBlocks.INTERVAL));
-
-        // Add frame to detector
-        const time = Date.now();
-        if (this._lastUpdate === null) {
-            this._lastUpdate = time;
-        }
-        const offset = time - this._lastUpdate;
-        if (offset > Scratch3VideoSensingBlocks.INTERVAL) {
-            const frame = this.runtime.ioDevices.video.getFrame({
-                format: Video.FORMAT_IMAGE_DATA,
-                dimensions: Scratch3VideoSensingBlocks.DIMENSIONS
-            });
-            if (frame) {
-                this._lastUpdate = time;
-                this.detect.addFrame(frame.data);
-            }
-        }
     }
 
     /**
@@ -267,25 +88,6 @@ class Scratch3VideoSensingBlocks {
             obj.value = entry.value || String(index + 1);
             return obj;
         });
-    }
-
-    /**
-     * @param {Target} target - collect motion state for this target.
-     * @returns {MotionState} the mutable motion state associated with that
-     *   target. This will be created if necessary.
-     * @private
-     */
-    _getMotionState (target) {
-        let motionState = target.getCustomState(Scratch3VideoSensingBlocks.STATE_KEY);
-        if (!motionState) {
-            motionState = Clone.simple(Scratch3VideoSensingBlocks.DEFAULT_MOTION_STATE);
-            target.setCustomState(Scratch3VideoSensingBlocks.STATE_KEY, motionState);
-        }
-        return motionState;
-    }
-
-    static get SensingAttribute () {
-        return SensingAttribute;
     }
 
     /**
@@ -317,10 +119,6 @@ class Scratch3VideoSensingBlocks {
         ];
     }
 
-    static get SensingSubject () {
-        return SensingSubject;
-    }
-
     /**
      * An array of info about the subject choices.
      * @type {object[]}
@@ -346,15 +144,6 @@ class Scratch3VideoSensingBlocks {
                 value: SensingSubject.STAGE
             }
         ];
-    }
-
-    /**
-     * States the video sensing activity can be set to.
-     * @readonly
-     * @enum {string}
-     */
-    static get VideoState () {
-        return VideoState;
     }
 
     /**
@@ -397,17 +186,6 @@ class Scratch3VideoSensingBlocks {
      * @returns {object} metadata for this extension and its blocks.
      */
     getInfo () {
-        // Set the video display properties to defaults the first time
-        // getInfo is run. This turns on the video device when it is
-        // first added to a project, and is overwritten by a PROJECT_LOADED
-        // event listener that later calls updateVideoDisplay
-        if (this.firstInstall) {
-            this.globalVideoState = VideoState.ON;
-            this.globalVideoTransparency = 50;
-            this.updateVideoDisplay();
-            this.firstInstall = false;
-        }
-
         // Return extension definition
         return {
             id: 'videoSensing',
@@ -502,86 +280,6 @@ class Scratch3VideoSensingBlocks {
                 }
             }
         };
-    }
-
-    /**
-     * Analyze a part of the frame that a target overlaps.
-     * @param {Target} target - a target to determine where to analyze
-     * @returns {MotionState} the motion state for the given target
-     */
-    _analyzeLocalMotion (target) {
-        const drawable = this.runtime.renderer._allDrawables[target.drawableID];
-        const state = this._getMotionState(target);
-        this.detect.getLocalMotion(drawable, state);
-        return state;
-    }
-
-    /**
-     * A scratch reporter block handle that analyzes the last two frames and
-     * depending on the arguments, returns the motion or direction for the
-     * whole stage or just the target sprite.
-     * @param {object} args - the block arguments
-     * @param {BlockUtility} util - the block utility
-     * @returns {number} the motion amount or direction of the stage or sprite
-     */
-    videoOn (args, util) {
-        this.detect.analyzeFrame();
-
-        let state = this.detect;
-        if (args.SUBJECT === SensingSubject.SPRITE) {
-            state = this._analyzeLocalMotion(util.target);
-        }
-
-        if (args.ATTRIBUTE === SensingAttribute.MOTION) {
-            return state.motionAmount;
-        }
-        return state.motionDirection;
-    }
-
-    /**
-     * A scratch hat block edge handle that analyzes the last two frames where
-     * the target sprite overlaps and if it has more motion than the given
-     * reference value.
-     * @param {object} args - the block arguments
-     * @param {BlockUtility} util - the block utility
-     * @returns {boolean} true if the sprite overlaps more motion than the
-     *   reference
-     */
-    whenMotionGreaterThan (args, util) {
-        this.detect.analyzeFrame();
-        const state = this._analyzeLocalMotion(util.target);
-        return state.motionAmount > Number(args.REFERENCE);
-    }
-
-    /**
-     * A scratch command block handle that configures the video state from
-     * passed arguments.
-     * @param {object} args - the block arguments
-     * @param {VideoState} args.VIDEO_STATE - the video state to set the device to
-     */
-    videoToggle (args) {
-        const state = args.VIDEO_STATE;
-        this.globalVideoState = state;
-        if (state === VideoState.OFF) {
-            this.runtime.ioDevices.video.disableVideo();
-        } else {
-            this.runtime.ioDevices.video.enableVideo();
-            // Mirror if state is ON. Do not mirror if state is ON_FLIPPED.
-            this.runtime.ioDevices.video.mirror = state === VideoState.ON;
-        }
-    }
-
-    /**
-     * A scratch command block handle that configures the video preview's
-     * transparency from passed arguments.
-     * @param {object} args - the block arguments
-     * @param {number} args.TRANSPARENCY - the transparency to set the video
-     *   preview to
-     */
-    setVideoTransparency (args) {
-        const transparency = Cast.toNumber(args.TRANSPARENCY);
-        this.globalVideoTransparency = transparency;
-        this.runtime.ioDevices.video.setPreviewGhost(transparency);
     }
 }
 

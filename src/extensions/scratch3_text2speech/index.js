@@ -1,13 +1,7 @@
 const formatMessage = require('format-message');
 const languageNames = require('scratch-translate-extension-languages');
-
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
-const Cast = require('../../util/cast');
-const MathUtil = require('../../util/math-util');
-const Clone = require('../../util/clone');
-const log = require('../../util/log');
-const fetchWithTimeout = require('../../util/fetch-with-timeout');
 
 /**
  * Icon svg to be displayed in the blocks category menu, encoded as a data URI.
@@ -22,30 +16,6 @@ const menuIconURI = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZ
  */
 // eslint-disable-next-line max-len
 const blockIconURI = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iNDBweCIgaGVpZ2h0PSI0MHB4IiB2aWV3Qm94PSIwIDAgNDAgNDAiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+CiAgICA8IS0tIEdlbmVyYXRvcjogU2tldGNoIDUyLjIgKDY3MTQ1KSAtIGh0dHA6Ly93d3cuYm9oZW1pYW5jb2RpbmcuY29tL3NrZXRjaCAtLT4KICAgIDx0aXRsZT5FeHRlbnNpb25zL1NvZnR3YXJlL1RleHQtdG8tU3BlZWNoLUJsb2NrPC90aXRsZT4KICAgIDxkZXNjPkNyZWF0ZWQgd2l0aCBTa2V0Y2guPC9kZXNjPgogICAgPGcgaWQ9IkV4dGVuc2lvbnMvU29mdHdhcmUvVGV4dC10by1TcGVlY2gtQmxvY2siIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHN0cm9rZS1vcGFjaXR5PSIwLjE1Ij4KICAgICAgICA8ZyBpZD0idGV4dDJzcGVlY2giIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQuMDAwMDAwLCA0LjAwMDAwMCkiIGZpbGwtcnVsZT0ibm9uemVybyIgc3Ryb2tlPSIjMDAwMDAwIj4KICAgICAgICAgICAgPHBhdGggZD0iTTExLjUsMTcuNjY5MzQzNSBDMTEuNSwxNi42NTM5MjY5IDEwLjAwNjAxNDUsMTYuMDg0NDI3NCA5LjExMjU2MDI0LDE2Ljg4ODMgTDYuNDEyNTYwMjQsMTkuMDUwNzE0IEM1LjM5MzQ2NzU1LDE5Ljg2Njg5OTQgNC4wNzQ5NzM1MSwyMC4zMzE3NTc1IDIuNywyMC4zMzE3NTc1IEwyLjMsMjAuMzMxNzU3NSBDMS4yNjUxOTIzMywyMC4zMzE3NTc1IDAuNSwyMS4wMjEyMDAzIDAuNSwyMS45MDQwNzEgTDAuNSwyNi4xMzg3OTg2IEMwLjUsMjcuMDIxNjY5MyAxLjI2NTE5MjMzLDI3LjcxMTExMiAyLjMsMjcuNzExMTEyIEwyLjcsMjcuNzExMTEyIEM0LjE1NzU1NjgyLDI3LjcxMTExMiA1LjQ1MzcyMzIyLDI4LjEzMzUyNzEgNi41MTk3MjA5OCwyOC45OTggTDkuMTE4NDAyOTMsMzEuMTU5MzIxNiBDMTAuMDI2MTg1NSwzMS45MDkwNzkzIDExLjUsMzEuMzQ3MjY4OSAxMS41LDMwLjI4MzQyNTUgTDExLjUsMTcuNjY5MzQzNSBaIiBpZD0ic3BlYWtlciIgZmlsbD0iIzRENEQ0RCI+PC9wYXRoPgogICAgICAgICAgICA8cGF0aCBkPSJNMjEuNjQzNjA2NiwxNi41IEMxOS45NzcwMDk5LDE4LjQzNzAyMzQgMTcuMTA1MDI3NSwxOS45Mjg1NzE0IDE1LjY2NjY2NjcsMTkuOTI4NTcxNCBDMTUuNTEyNjM5NywxOS45Mjg1NzE0IDE1LjMxNjYyOTIsMTkuODk1OTAzIDE1LjEwOTcyNjUsMTkuNzkyNDUxNyBDMTQuNzM3NjAzOSwxOS42MDYzOTA0IDE0LjUsMTkuMjQ5OTg0NiAxNC41LDE4Ljc2MTkwNDggQzE0LjUsMTguNjU2ODA0MSAxNC41MTcwNTU1LDE4LjU1NDUwNzYgMTQuNTQ5NDQ2NywxOC40NTQwODQ0IEMxNC42MjU3NTQ1LDE4LjIxNzUwNjMgMTUuMTczNTcyMSwxNy40Njc1MzEgMTUuMjc3MjA3MSwxNy4yODA5ODgxIEMxNS41NDYzNTI2LDE2Ljc5NjUyNjEgMTUuNzM5MDI1LDE2LjIwNjM1NjEgMTUuODQzMjg5MSwxNS40MTYwMDM0IEMxMy4xODk3MDA1LDEzLjkyNjgzNjkgMTEuNSwxMS4xMTM5NjY4IDExLjUsOCBDMTEuNSwzLjMwNTU3OTYzIDE1LjMwNTU3OTYsLTAuNSAyMCwtMC41IEwyNCwtMC41IEMyOC42OTQ0MjA0LC0wLjUgMzIuNSwzLjMwNTU3OTYzIDMyLjUsOCBDMzIuNSwxMi42OTQ0MjA0IDI4LjY5NDQyMDQsMTYuNSAyNCwxNi41IEwyMS42NDM2MDY2LDE2LjUgWiIgaWQ9InNwZWVjaCIgZmlsbD0iI0ZGRkZGRiI+PC9wYXRoPgogICAgICAgIDwvZz4KICAgIDwvZz4KPC9zdmc+';
-
-/**
- * The url of the synthesis server.
- * @type {string}
- */
-const SERVER_HOST = 'https://synthesis-service.scratch.mit.edu';
-
-/**
- * pm: The url of the extra TTS server.
- * @type {string}
- */
-const PM_SERVER_HOST = 'https://gextapi.derpygamer2142.com';
-
-/**
- * How long to wait in ms before timing out requests to synthesis server.
- * @type {int}
- */
-const SERVER_TIMEOUT = 10000; // 10 seconds
-
-/**
- * Volume for playback of speech sounds, as a percentage.
- * @type {number}
- */
-const SPEECH_VOLUME = 250;
 
 /**
  * An id for one of the voices.
@@ -78,16 +48,6 @@ const KITTEN_ID = 'KITTEN';
 const GOOGLE_ID = 'GOOGLE';
 
 /**
- * Playback rate for the tenor voice, for cases where we have only a female gender voice.
- */
-const FEMALE_TENOR_RATE = 0.89; // -2 semitones
-
-/**
- * Playback rate for the giant voice, for cases where we have only a female gender voice.
- */
-const FEMALE_GIANT_RATE = 0.79; // -4 semitones
-
-/**
  * Language ids. The value for each language id is a valid Scratch locale.
  */
 const ARABIC_ID = 'ar';
@@ -114,11 +74,6 @@ const SWEDISH_ID = 'sv';
 const TURKISH_ID = 'tr';
 const WELSH_ID = 'cy';
 
-const clampToAudioLimits = (num) => {
-    // these limits are based on the chromium & firefox audio element limits
-    return Math.min(Math.max(num, 0.0625), 16);
-};
-
 /**
  * Class for the text2speech blocks.
  * @constructor
@@ -130,28 +85,6 @@ class Scratch3Text2SpeechBlocks {
          * @type {Runtime}
          */
         this.runtime = runtime;
-
-        /**
-         * Map of soundPlayers by sound id.
-         * @type {Map<string, SoundPlayer>}
-         */
-        this._soundPlayers = new Map();
-
-        this._stopAllSpeech = this._stopAllSpeech.bind(this);
-        if (this.runtime) {
-            this.runtime.on('PROJECT_STOP_ALL', this._stopAllSpeech);
-        }
-
-        this._onTargetCreated = this._onTargetCreated.bind(this);
-        if (this.runtime) {
-            runtime.on('targetWasCreated', this._onTargetCreated);
-        }
-
-        /**
-         * A list of all Scratch locales that are supported by the extension.
-         * @type {Array}
-         */
-        this._supportedLocales = this._getSupportedLocales();
     }
 
     /**
@@ -419,14 +352,6 @@ class Scratch3Text2SpeechBlocks {
     }
 
     /**
-     * The key to load & store a target's text2speech state.
-     * @return {string} The key.
-     */
-    static get STATE_KEY () {
-        return 'Scratch.text2speech';
-    }
-
-    /**
      * The default state, to be used when a target has no existing state.
      * @type {Text2SpeechState}
      */
@@ -445,49 +370,16 @@ class Scratch3Text2SpeechBlocks {
     }
 
     /**
-     * @param {Target} target - collect  state for this target.
-     * @returns {Text2SpeechState} the mutable state associated with that target. This will be created if necessary.
-     * @private
-     */
-    _getState (target) {
-        let state = target.getCustomState(Scratch3Text2SpeechBlocks.STATE_KEY);
-        if (!state) {
-            state = Clone.simple(Scratch3Text2SpeechBlocks.DEFAULT_TEXT2SPEECH_STATE);
-            target.setCustomState(Scratch3Text2SpeechBlocks.STATE_KEY, state);
-        }
-        return state;
-    }
-
-    /**
-     * When a Target is cloned, clone the state.
-     * @param {Target} newTarget - the newly created target.
-     * @param {Target} [sourceTarget] - the target used as a source for the new clone, if any.
-     * @listens Runtime#event:targetWasCreated
-     * @private
-     */
-    _onTargetCreated (newTarget, sourceTarget) {
-        if (sourceTarget) {
-            const state = sourceTarget.getCustomState(Scratch3Text2SpeechBlocks.STATE_KEY);
-            if (state) {
-                newTarget.setCustomState(Scratch3Text2SpeechBlocks.STATE_KEY, Clone.simple(state));
-            }
-        }
-    }
-
-    /**
      * @returns {object} metadata for this extension and its blocks.
      */
     getInfo () {
         // Only localize the default input to the "speak" block if we are in a
         // supported language.
-        let defaultTextToSpeak = 'hello';
-        if (this.isSupportedLanguage(this.getEditorLanguage())) {
-            defaultTextToSpeak = formatMessage({
-                id: 'text2speech.defaultTextToSpeak',
-                default: 'hello',
-                description: 'hello: the default text to speak'
-            });
-        }
+        const defaultTextToSpeak = formatMessage({
+            id: 'text2speech.defaultTextToSpeak',
+            default: 'hello',
+            description: 'hello: the default text to speak'
+        });
 
         return {
             id: 'text2speech',
@@ -542,7 +434,7 @@ class Scratch3Text2SpeechBlocks {
                         LANGUAGE: {
                             type: ArgumentType.STRING,
                             menu: 'languages',
-                            defaultValue: this.getCurrentLanguage()
+                            defaultValue: "English",
                         }
                     }
                 },
@@ -576,120 +468,6 @@ class Scratch3Text2SpeechBlocks {
     }
 
     /**
-     * Get the language code currently set in the editor, or fall back to the
-     * browser locale.
-     * @return {string} a Scratch locale code.
-     */
-    getEditorLanguage () {
-        const locale = formatMessage.setup().locale ||
-            navigator.language || navigator.userLanguage || this.DEFAULT_LANGUAGE;
-        return locale.toLowerCase();
-    }
-
-    /**
-     * Get the language code currently set for the extension.
-     * @returns {string} a Scratch locale code.
-     */
-    getCurrentLanguage () {
-        const stage = this.runtime.getTargetForStage();
-        if (!stage) return this.DEFAULT_LANGUAGE;
-        // If no language has been set, set it to the editor locale (or default).
-        if (!stage.textToSpeechLanguage) {
-            this.setCurrentLanguage(this.getEditorLanguage());
-        }
-        return stage.textToSpeechLanguage;
-    }
-
-    /**
-     * Set the language code for the extension.
-     * It is stored in the stage so it can be saved and loaded with the project.
-     * @param {string} locale a locale code.
-     */
-    setCurrentLanguage (locale) {
-        const stage = this.runtime.getTargetForStage();
-        if (!stage) return;
-
-        if (this.isSupportedLanguage(locale)) {
-            stage.textToSpeechLanguage = this._getExtensionLocaleForSupportedLocale(locale);
-        }
-
-        // Support language names dropped onto the menu via reporter block
-        // such as a variable containing a language name (in any language),
-        // or the translate extension's language reporter.
-        const localeForDroppedName = languageNames.nameMap[locale.toLowerCase()];
-        if (localeForDroppedName && this.isSupportedLanguage(localeForDroppedName)) {
-            stage.textToSpeechLanguage =
-                this._getExtensionLocaleForSupportedLocale(localeForDroppedName);
-        }
-
-        // If the language is null, set it to the default language.
-        // This can occur e.g. if the extension was loaded with the editor
-        // set to a language that is not in the list.
-        if (!stage.textToSpeechLanguage) {
-            stage.textToSpeechLanguage = this.DEFAULT_LANGUAGE;
-        }
-    }
-
-    /**
-     * Get the extension locale for a supported locale, or null.
-     * @param {string} locale a locale code.
-     * @returns {?string} a locale supported by the extension.
-     */
-    _getExtensionLocaleForSupportedLocale (locale) {
-        for (const lang in this.LANGUAGE_INFO) {
-            if (this.LANGUAGE_INFO[lang].locales.includes(locale)) {
-                return lang;
-            }
-        }
-        log.error(`cannot find extension locale for locale ${locale}`);
-    }
-
-    /**
-     * Get the locale code used by the speech synthesis server corresponding to
-     * the current language code set for the extension.
-     * @returns {string} a speech synthesis locale.
-     */
-    _getSpeechSynthLocale () {
-        let speechSynthLocale = this.LANGUAGE_INFO[this.DEFAULT_LANGUAGE].speechSynthLocale;
-        if (this.LANGUAGE_INFO[this.getCurrentLanguage()]) {
-            speechSynthLocale = this.LANGUAGE_INFO[this.getCurrentLanguage()].speechSynthLocale;
-        }
-        return speechSynthLocale;
-    }
-
-    /**
-     * Get the locale code used by the PenguinMod TTS server corresponding to
-     * the current language code set for the extension.
-     * @returns {string} a PenguinMod TTS locale.
-     */
-    _getPenguinModSynthLocale () {
-        let speechSynthLocale = this.LANGUAGE_INFO[this.DEFAULT_LANGUAGE].penguinmodSynthLocale;
-        if (this.LANGUAGE_INFO[this.getCurrentLanguage()]) {
-            speechSynthLocale = this.LANGUAGE_INFO[this.getCurrentLanguage()].penguinmodSynthLocale;
-        }
-        return speechSynthLocale;
-    }
-
-    /**
-     * Get an array of the locales supported by this extension.
-     * @returns {Array} An array of locale strings.
-     */
-    _getSupportedLocales () {
-        return Object.keys(this.LANGUAGE_INFO).reduce((acc, lang) =>
-            acc.concat(this.LANGUAGE_INFO[lang].locales), []);
-    }
-
-    /**
-     * Check if a Scratch language code is in the list of supported languages for the
-     * speech synthesis service.
-     * @param {string} languageCode the language code to check.
-     * @returns {boolean} true if the language code is supported.
-     */
-    isSupportedLanguage (languageCode) {
-        return this._supportedLocales.includes(languageCode);
-    }
-
-    /**
      * Get the menu of voices for the "set voice" block.
      * @return {array} the text and value for each menu item.
      */
@@ -709,7 +487,7 @@ class Scratch3Text2SpeechBlocks {
      * @return {array} the text and value for each menu item.
      */
     getLanguageMenu () {
-        const editorLanguage = this.getEditorLanguage();
+        const editorLanguage = "en"; // generated extension info is always in English.
         // Get the array of localized language names
         const localizedNameMap = {};
         let nameArray = languageNames.menuMap[editorLanguage];
@@ -744,167 +522,6 @@ class Scratch3Text2SpeechBlocks {
                 value: key
             };
         });
-    }
-
-    /**
-     * Set the voice for speech synthesis for this sprite.
-     * @param  {object} args Block arguments
-     * @param {object} util Utility object provided by the runtime.
-     */
-    setVoice (args, util) {
-        const state = this._getState(util.target);
-
-        let voice = args.VOICE;
-
-        // If the arg is a dropped number, treat it as a voice index
-        let voiceNum = parseInt(voice, 10);
-        if (!isNaN(voiceNum)) {
-            voiceNum -= 1; // Treat dropped args as one-indexed
-            voiceNum = MathUtil.wrapClamp(voiceNum, 0, Object.keys(this.VOICE_INFO).length - 1);
-            voice = Object.keys(this.VOICE_INFO)[voiceNum];
-        }
-
-        // Only set the voice if the arg is a valid voice id.
-        if (Object.keys(this.VOICE_INFO).includes(voice)) {
-            state.voiceId = voice;
-        }
-    }
-
-    /**
-     * Set the language for speech synthesis.
-     * @param  {object} args Block arguments
-     */
-    setLanguage (args) {
-        this.setCurrentLanguage(args.LANGUAGE);
-    }
-
-    setSpeed (args, util) {
-        const state = this._getState(util.target);
-        const speed = Cast.toNumber(args.SPEED) / 100;
-        // ideally no core blocks should cause errors
-        state.speed = clampToAudioLimits(speed);
-    }
-
-    /**
-     * Stop all currently playing speech sounds.
-     */
-    _stopAllSpeech () {
-        this._soundPlayers.forEach(player => {
-            player.stop();
-        });
-    }
-
-    /**
-     * Convert the provided text into a sound file and then play the file.
-     * @param  {object} args Block arguments
-     * @param {object} util Utility object provided by the runtime.
-     * @return {Promise} A promise that resolves after playing the sound
-     */
-    speakAndWait (args, util) {
-        // Cast input to string
-        let words = Cast.toString(args.WORDS);
-        let locale = this._getSpeechSynthLocale();
-
-        const state = this._getState(util.target);
-
-        let gender = this.VOICE_INFO[state.voiceId].gender;
-        let playbackRate = this.VOICE_INFO[state.voiceId].playbackRate;
-
-        // Special case for voices where the synthesis service only provides a
-        // single gender voice. In that case, always request the female voice,
-        // and set special playback rates for the tenor and giant voices.
-        if (this.LANGUAGE_INFO[this.getCurrentLanguage()].singleGender) {
-            gender = 'female';
-            if (state.voiceId === TENOR_ID) {
-                playbackRate = FEMALE_TENOR_RATE;
-            }
-            if (state.voiceId === GIANT_ID) {
-                playbackRate = FEMALE_GIANT_RATE;
-            }
-        }
-
-        if (state.voiceId === KITTEN_ID) {
-            words = words.replace(/\S+/g, 'meow');
-            locale = this.LANGUAGE_INFO[this.DEFAULT_LANGUAGE].speechSynthLocale;
-        }
-
-        let isPenguinMod = false;
-        let penguinModVoice = '';
-        let speechVolume = SPEECH_VOLUME;
-        if (this.PENGUINMOD_VOICES.includes(state.voiceId)) {
-            // This is a PenguinMod voice and has to be handled differently.
-            isPenguinMod = true;
-            locale = this._getPenguinModSynthLocale();
-            penguinModVoice = this.PENGUINMOD_VOICE_MAP[state.voiceId];
-            speechVolume = this.PENGUINMOD_VOICE_VOLUMES[state.voiceId];
-        }
-
-        // Build up URL
-        let path = '';
-        if (isPenguinMod) {
-            path = `${PM_SERVER_HOST}/tts`;
-        } else {
-            path = `${SERVER_HOST}/synth`;
-        }
-        if (isPenguinMod) {
-            path += `?lang=${locale}`;
-            path += `&voice=${penguinModVoice}`;
-        } else {
-            path += `?locale=${locale}`;
-        }
-        path += `&gender=${gender}`;
-        // this textLimit is enforced on the API, no point in increasing it here
-        let textLimit = 128;
-        if (isPenguinMod) {
-            textLimit = 512;
-        }
-        path += `&text=${encodeURIComponent(words.substring(0, textLimit))}`;
-
-        if (typeof state.speed === 'number') {
-            playbackRate *= state.speed;
-            playbackRate = clampToAudioLimits(playbackRate);
-        }
-
-        // Perform HTTP request to get audio file
-        return fetchWithTimeout(path, {}, SERVER_TIMEOUT)
-            .then(res => {
-                if (res.status !== 200) {
-                    throw new Error(`HTTP ${res.status} error reaching translation service`);
-                }
-
-                return res.arrayBuffer();
-            })
-            .then(buffer => {
-                // Play the sound
-                const sound = {
-                    data: {
-                        buffer
-                    }
-                };
-                return this.runtime.audioEngine.decodeSoundPlayer(sound);
-            })
-            .then(soundPlayer => {
-                this._soundPlayers.set(soundPlayer.id, soundPlayer);
-
-                soundPlayer.setPlaybackRate(playbackRate);
-
-                // Increase the volume
-                const engine = this.runtime.audioEngine;
-                const chain = engine.createEffectChain();
-                chain.set('volume', speechVolume);
-                soundPlayer.connect(chain);
-
-                soundPlayer.play();
-                return new Promise(resolve => {
-                    soundPlayer.on('stop', () => {
-                        this._soundPlayers.delete(soundPlayer.id);
-                        resolve();
-                    });
-                });
-            })
-            .catch(err => {
-                log.warn(err);
-            });
     }
 }
 module.exports = Scratch3Text2SpeechBlocks;

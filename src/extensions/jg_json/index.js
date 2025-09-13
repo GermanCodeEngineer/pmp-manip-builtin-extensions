@@ -5,8 +5,6 @@ const ArgumentType = require('../../extension-support/argument-type');
 
 const noopSwitch = { isNoop: true };
 
-// const Cast = require('../../util/cast');
-
 /**
  * Class for JSON blocks
  * @constructor

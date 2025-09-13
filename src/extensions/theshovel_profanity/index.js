@@ -6,7 +6,6 @@
 
 const ArgumentType = require("../../extension-support/argument-type");
 const BlockType = require("../../extension-support/block-type");
-const Cast = require("../../util/cast");
 
 class profanityAPI {
     getInfo() {
@@ -28,13 +27,6 @@ class profanityAPI {
                 },
             ],
         };
-    }
-
-    checkProfanity({ TEXT }) {
-        const text = encodeURIComponent(Cast.toString(TEXT));
-        return fetch(`https://www.purgomalum.com/service/plain?text=${text}`)
-            .then((r) => r.text())
-            .catch(() => "");
     }
 }
 

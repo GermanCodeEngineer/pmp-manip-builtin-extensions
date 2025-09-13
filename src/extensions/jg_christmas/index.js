@@ -22,7 +22,7 @@ class Extension {
             name: 'Christmas',
             color1: '#ff0000',
             color2: '#00ff00',
-            blockIconURI: require('./icon.png'),
+            blockIconURI: null, // Icons do not matter
             blocks: [
                 {
                     opcode: 'snow',
