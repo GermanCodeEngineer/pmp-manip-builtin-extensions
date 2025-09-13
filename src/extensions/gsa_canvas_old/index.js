@@ -1,7 +1,5 @@
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const Color = require('../../util/color');
-const Cast = require('../../util/cast');
 
 /**
  * Class

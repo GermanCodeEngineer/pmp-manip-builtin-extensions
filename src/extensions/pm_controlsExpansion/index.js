@@ -70,10 +70,10 @@ class pmControlsExpansion {
                     }
                 },
                 {
-                    opcode: "control_inline_stack_output", // HERE
+                    opcode: "control_inline_stack_output",
                     text: "inline block",
                     branchCount: 1,
-                    blockType: BlockType.REPORTER,
+                    blockType: BlockType.REPORTER, // Technically unknown but behaves like REPORTER+SQUARE
                     blockShape: Scratch.BlockShape.SQUARE,
                     disableMonitor: true,
                 },
