@@ -203,18 +203,6 @@ class pmSensingExpansion {
                     blockType: BlockType.REPORTER
                 },
                 {
-                    opcode: 'amountOfTimeKeyHasBeenHeld',
-                    text: 'seconds since holding [KEY]',
-                    blockType: BlockType.REPORTER,
-                    arguments: {
-                        KEY: {
-                            // this is replaced later
-                            type: ArgumentType.STRING,
-                            defaultValue: 'a'
-                        }
-                    }
-                },
-                {
                     opcode: 'getLastKeyPressed',
                     text: Scratch.translate({
                         id: 'tw.blocks.lastKeyPressed',
@@ -296,8 +284,8 @@ class pmSensingExpansion {
                 },
                 {
                     opcode: 'amountOfTimeKeyHasBeenHeld',
-                    blockType: BlockType.REPORTER,
                     text: 'seconds since holding [KEY]',
+                    blockType: BlockType.REPORTER,
                     arguments: {
                         KEY: {
                             type: ArgumentType.STRING,

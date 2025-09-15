@@ -49,25 +49,6 @@ class Extension {
                     ...Lambda.Block
                 },
                 {
-                    blockType: BlockType.XML,
-                    xml: `
-                    <block type="jwLambda_newLambda">
-                        <value name="ARG">
-                            <shadow type="jwLambda_arg" />
-                        </value>
-                        <value name="SUBSTACK">
-                            <block type="procedures_return">
-                                <value name="return">
-                                    <shadow type="text">
-                                        <field name="TEXT">1</field>
-                                    </shadow>
-                                </value>
-                            </block>
-                        </value>
-                    </block>
-                    `
-                },
-                {
                     opcode: 'rawLambdaInput',
                     text: '[FIELD]',
                     hideFromPalette: true,

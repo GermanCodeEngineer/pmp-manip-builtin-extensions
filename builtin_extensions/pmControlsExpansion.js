@@ -1,4 +1,5 @@
 const BlockType = require('../../extension-support/block-type');
+const BlockShape = require('../../extension-support/block-shape');
 const ArgumentType = require('../../extension-support/argument-type');
 const ArgumentAlignment = require('../../extension-support/argument-alignment');
 const AsyncIcon = null; // Icons do not matter
@@ -76,7 +77,7 @@ class pmControlsExpansion {
                     text: "inline block",
                     branchCount: 1,
                     blockType: BlockType.REPORTER, // Technically unknown but behaves like REPORTER+SQUARE
-                    blockShape: Scratch.BlockShape.SQUARE,
+                    blockShape: BlockShape.SQUARE,
                     disableMonitor: true,
                 },
                 {

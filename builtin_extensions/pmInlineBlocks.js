@@ -29,7 +29,7 @@ class pmInlineBlocks {
                     ppm_final_opcode: true,
                     text: "inline block",
                     branchCount: 1,
-                    blockType: BlockType.REPORTER, // Technically unknown but behaves like REPORTER+SQUARE
+                    blockType: Scratch.BlockType.REPORTER, // Technically unknown but behaves like REPORTER+SQUARE
                     blockShape: Scratch.BlockShape.SQUARE,
                     disableMonitor: true,
                 },
