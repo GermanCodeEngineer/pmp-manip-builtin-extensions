@@ -49,6 +49,25 @@ const ItalicsParam = {
  *   diameter but not for pen color.
  */
 
+const SANS_SERIF_ID = 'Sans Serif';
+const SERIF_ID = 'Serif';
+const HANDWRITING_ID = 'Handwriting';
+const MARKER_ID = 'Marker';
+const CURLY_ID = 'Curly';
+const PIXEL_ID = 'Pixel';
+
+/* PenguinMod Fonts */
+const PLAYFUL_ID = 'Playful';
+const BUBBLY_ID = 'Bubbly';
+const BITSANDBYTES_ID = 'Bits and Bytes';
+const TECHNOLOGICAL_ID = 'Technological';
+const ARCADE_ID = 'Arcade';
+const ARCHIVO_ID = 'Archivo';
+const ARCHIVOBLACK_ID = 'Archivo Black';
+const SCRATCH_ID = 'Scratch';
+
+const RANDOM_ID = 'Random';
+
 /**
  * Host for the Pen-related blocks in Scratch 3.0
  * @param {Runtime} runtime - the runtime instantiating this block package.
@@ -751,7 +770,53 @@ class Scratch3PenBlocks {
                     items: this.getItalicsToggleParam()
                 },
                 FONT: {
-                    items: '_getFonts',
+                    items: [{
+                        text: 'Sans Serif',
+                        value: SANS_SERIF_ID
+                    }, {
+                        text: 'Serif',
+                        value: SERIF_ID
+                    }, {
+                        text: 'Handwriting',
+                        value: HANDWRITING_ID
+                    }, {
+                        text: 'Marker',
+                        value: MARKER_ID
+                    }, {
+                        text: 'Curly',
+                        value: CURLY_ID
+                    }, {
+                        text: 'Pixel',
+                        value: PIXEL_ID
+                    }, {
+                        text: 'Playful',
+                        value: PLAYFUL_ID
+                    }, {
+                        text: 'Bubbly',
+                        value: BUBBLY_ID
+                    }, {
+                        text: 'Arcade',
+                        value: ARCADE_ID
+                    }, {
+                        text: 'Bits and Bytes',
+                        value: BITSANDBYTES_ID
+                    }, {
+                        text: 'Technological',
+                        value: TECHNOLOGICAL_ID
+                    }, {
+                        text: 'Scratch',
+                        value: SCRATCH_ID
+                    }, {
+                        text: 'Archivo',
+                        value: ARCHIVO_ID
+                    }, {
+                        text: 'Archivo Black',
+                        value: ARCHIVOBLACK_ID
+                    },
+                    {
+                        text: 'random font',
+                        value: RANDOM_ID
+                    }],
                     isTypeable: true
                 }
             }
