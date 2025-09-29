@@ -45,6 +45,31 @@ class pmControlsExpansion {
                     },
                 },
                 {
+                    opcode: 'control_if',
+                    ppm_final_opcode: true,
+                    text: [
+                        'if [CONDITION] then',
+                    ],
+                    branchCount: 1,
+                    blockType: BlockType.CONDITIONAL,
+                    arguments: {
+                        CONDITION: { type: ArgumentType.BOOLEAN }
+                    }
+                },
+                {
+                    opcode: 'control_if_else',
+                    ppm_final_opcode: true,
+                    text: [
+                        'if [CONDITION] then',
+                        'else'
+                    ],
+                    branchCount: 2,
+                    blockType: BlockType.CONDITIONAL,
+                    arguments: {
+                        CONDITION: { type: ArgumentType.BOOLEAN }
+                    }
+                },
+                {
                     opcode: 'ifElseIf',
                     text: [
                         'if [CONDITION1] then',
